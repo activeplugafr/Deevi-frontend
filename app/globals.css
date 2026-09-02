@@ -1,26 +1,117 @@
 @import "tailwindcss";
 
+/*
+  Deevi design system
+  ------------------------------------------------------------------
+  BLUE   = primary brand / action    BLACK = headings, strong text
+  WHITE  = surfaces / backgrounds     GRAY  = borders, muted, disabled
+  ORANGE = urgency / warning only (used extremely sparingly)
+  Light theme only for the MVP — a marketplace people trust reads best light.
+*/
+
+@theme {
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #dbe6ff;
+  --color-brand-200: #bdd1ff;
+  --color-brand-300: #90b2ff;
+  --color-brand-400: #5b86fb;
+  --color-brand-500: #2f62f0;
+  --color-brand-600: #1b47d6;
+  --color-brand-700: #1738ac;
+  --color-brand-800: #193291;
+  --color-brand-900: #1a2f76;
+
+  --color-ink: #0b1220;
+  --color-ink-soft: #354152;
+  --color-muted: #6b7688;
+  --color-line: #e6e9ef;
+  --color-surface: #ffffff;
+  --color-canvas: #f6f7f9;
+
+  --color-warn-50: #fff5ec;
+  --color-warn-500: #f5820b;
+  --color-warn-600: #d96c00;
+
+  --color-success-50: #ecfdf3;
+  --color-success-600: #067647;
+  --color-danger-50: #fef3f2;
+  --color-danger-600: #d92d20;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Arial, sans-serif;
+
+  --radius-lg: 0.75rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f7f9;
+  --foreground: #0b1220;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Consistent, visible focus for keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@keyframes deevi-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #eceef2;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  animation: deevi-shimmer 1.4s infinite;
+}
+
+/* Thin, unobtrusive scrollbars for scroll regions (messages, tables). */
+.scroll-slim {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd2dc transparent;
+}
+.scroll-slim::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: #cbd2dc;
+  border-radius: 999px;
 }
