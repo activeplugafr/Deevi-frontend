@@ -32,7 +32,7 @@ export function LocationStep({
   }, []);
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
 
-  const set = (patch: Partial<ServiceLocationInput>) => onChange({ ...value, ...patch });
+  const set = (patch: Partial<ServiceLocationInput>) => onChange({ ...value, ...patch, country: "NG", });
 
   function useDevice() {
     if (!("geolocation" in navigator)) {

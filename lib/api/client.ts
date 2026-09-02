@@ -12,7 +12,15 @@
 import { ApiError, NetworkError, type ApiErrorBody } from "@/lib/errors";
 import { getSession, setSession, clearSession, type StoredSession } from "@/lib/auth/session";
 
-const BASE = "/bff/api/v1";
+// const BASE = "/bff/api/v1";
+
+// const BASE = "https://deevi-backend.onrender.com/api/v1";
+
+const BASE = process.env.NEXT_PUBLIC_DEEVI_API_URL;
+
+console.log(BASE, "BASE")
+
+
 
 type Query = Record<string, unknown>;
 
@@ -25,6 +33,7 @@ interface RequestOptions {
 }
 
 function buildUrl(path: string, query?: Query): string {
+  // const url = path.startsWith("/bff") ? path : `${BASE}${path}`;
   const url = path.startsWith("/bff") ? path : `${BASE}${path}`;
   if (!query) return url;
   const params = new URLSearchParams();
