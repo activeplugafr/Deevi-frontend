@@ -10,13 +10,14 @@ import { Card, Avatar, VerifiedTick } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/Button";
 import { Loading, ErrorState, EmptyState, SkeletonList } from "@/components/ui/states";
 import { BackLink, JobStatusBadge, UrgencyBadge } from "@/components/ui/bits";
+import { RailLayout, SectionCard } from "@/components/ui/patterns";
 import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ReviewModal } from "@/components/jobs/ReviewModal";
 import { ReportModal } from "@/components/shared/ReportModal";
 import { ApplicationCard } from "@/components/jobs/ApplicationCard";
 import { areaLabel, budgetLabel, dateTime, fullName, humanize, naira } from "@/lib/format";
-import { IconMapPin, IconClock, IconChat, IconCheck, IconFlag } from "@/components/ui/icons";
+import { IconMapPin, IconClock, IconChat, IconCheck, IconFlag, IconShield } from "@/components/ui/icons";
 
 const OPEN_STATES = ["PUBLISHED", "RECEIVING_APPLICATIONS"];
 const ENGAGED_STATES = ["ARTISAN_SELECTED", "ACCEPTED", "IN_PROGRESS"];
@@ -71,32 +72,48 @@ export default function CustomerJobDetail({ params }: { params: Promise<{ id: st
   })();
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div>
       <BackLink href="/jobs" label="My jobs" />
 
-      <div className="mt-3 flex items-start justify-between gap-3">
+      <div className="mb-4 mt-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="mb-1.5 flex items-center gap-2">
             <JobStatusBadge status={job.status} />
             <UrgencyBadge urgency={job.urgency} />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">{job.title}</h1>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">{job.title}</h1>
           <p className="mt-1 text-sm text-muted">
             {job.service_name ?? "Service"} · Posted {dateTime(job.created_at)}
           </p>
         </div>
       </div>
 
-      {/* Meta */}
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Meta label="Location" value={areaLabel(job.neighbourhood, job.city, job.state)} icon={<IconMapPin size={16} />} />
-        <Meta label="Budget" value={budgetLabel(job.budget_min, job.budget_max, job.budget_type)} />
-        <Meta label="Applications" value={String(job.applications_count)} />
-        {job.preferred_start_at && <Meta label="Preferred start" value={dateTime(job.preferred_start_at)} icon={<IconClock size={16} />} />}
-      </div>
-
+      <RailLayout
+        rail={
+          <>
+            <SectionCard title="Job parameters">
+              <dl className="space-y-3 text-sm">
+                <Param icon={<IconMapPin size={15} />} label="Location" value={areaLabel(job.neighbourhood, job.city, job.state)} />
+                <Param label="Budget" value={budgetLabel(job.budget_min, job.budget_max, job.budget_type)} />
+                <Param label="Applications" value={String(job.applications_count)} />
+                {job.preferred_start_at && <Param icon={<IconClock size={15} />} label="Preferred start" value={dateTime(job.preferred_start_at)} />}
+              </dl>
+            </SectionCard>
+            <SectionCard icon={<IconShield size={18} />} title="Deevi direct guarantee">
+              <ul className="space-y-2 text-sm text-ink-soft">
+                {["Identity & background-verified artisans", "No platform cut — you settle directly", "Report a problem any time for follow-up"].map((t) => (
+                  <li key={t} className="flex items-start gap-2">
+                    <IconCheck size={16} className="mt-0.5 shrink-0 text-brand-600" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </SectionCard>
+          </>
+        }
+      >
       {/* Description */}
-      <Card className="mt-4 p-4">
+      <Card className="p-4">
         <h2 className="text-sm font-semibold text-ink">Job details</h2>
         <p className="mt-2 whitespace-pre-wrap text-sm text-ink-soft">{job.description}</p>
         {job.additional_notes && (
@@ -179,6 +196,7 @@ export default function CustomerJobDetail({ params }: { params: Promise<{ id: st
           <IconFlag size={16} /> Report a problem
         </Button>
       </div>
+      </RailLayout>
 
       {/* Dialogs */}
       <ConfirmDialog
@@ -212,14 +230,14 @@ export default function CustomerJobDetail({ params }: { params: Promise<{ id: st
   );
 }
 
-function Meta({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
+function Param({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-line bg-surface p-3">
-      <p className="text-[11px] uppercase tracking-wide text-muted">{label}</p>
-      <p className="mt-0.5 flex items-center gap-1 text-sm font-semibold text-ink">
-        {icon && <span className="text-muted">{icon}</span>}
-        <span className="truncate">{value}</span>
-      </p>
+    <div className="flex items-center justify-between gap-2">
+      <dt className="flex items-center gap-1.5 text-muted">
+        {icon}
+        {label}
+      </dt>
+      <dd className="truncate text-right font-medium text-ink">{value}</dd>
     </div>
   );
 }

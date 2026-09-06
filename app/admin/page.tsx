@@ -5,7 +5,7 @@ import { adminApi } from "@/lib/api";
 import { useAsync } from "@/lib/hooks";
 import { Card } from "@/components/ui/primitives";
 import { AsyncBoundary } from "@/components/ui/states";
-import { PageHeader } from "@/components/ui/bits";
+import { WorkspaceHeader, StatTile } from "@/components/ui/patterns";
 import { Skeleton } from "@/components/ui/states";
 import { humanize } from "@/lib/format";
 import { IconShield, IconFlag, IconBriefcase, IconUsers } from "@/components/ui/icons";
@@ -40,7 +40,11 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <PageHeader title="Operations dashboard" subtitle="Marketplace health at a glance." />
+      <WorkspaceHeader
+        eyebrow="Operations Overview"
+        title="Operations dashboard"
+        description="Marketplace health at a glance."
+      />
 
       <AsyncBoundary
         loading={loading}
@@ -55,10 +59,7 @@ export default function AdminDashboard() {
         {tiles.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {tiles.map((t) => (
-              <Card key={t.label} className="p-4">
-                <p className="text-2xl font-bold text-ink">{t.value.toLocaleString()}</p>
-                <p className="mt-1 text-xs text-muted">{t.label}</p>
-              </Card>
+              <StatTile key={t.label} label={t.label} value={t.value.toLocaleString()} />
             ))}
           </div>
         ) : (

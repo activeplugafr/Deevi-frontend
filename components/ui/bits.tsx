@@ -30,6 +30,15 @@ export function UrgencyBadge({ urgency }: { urgency: string }) {
   return <Badge className={t.className}>{t.label}</Badge>;
 }
 
+/** Marks a screen (or section) as showing fabricated placeholder data. */
+export function DemoBadge({ className }: { className?: string }) {
+  return (
+    <Badge className={`border border-warn-500/30 bg-warn-50 text-warn-600 ${className ?? ""}`}>
+      Demo data
+    </Badge>
+  );
+}
+
 // ---- Star rating -----------------------------------------------------------
 
 export function Stars({
@@ -116,8 +125,8 @@ export function PageHeader({
   return (
     <div className={cn("mb-5 flex items-start justify-between gap-3", className)}>
       <div className="min-w-0">
-        <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">{title}</h1>
-        {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}
+        <h1 className="font-display text-2xl font-bold tracking-tight text-ink sm:text-[1.75rem]">{title}</h1>
+        {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -144,8 +153,8 @@ export function Segmented<T extends string>({
           className={cn(
             "whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition",
             value === opt.value
-              ? "bg-ink text-white"
-              : "bg-surface text-ink-soft border border-line hover:bg-canvas",
+              ? "bg-brand-600 text-white shadow-card"
+              : "bg-surface text-ink-soft border border-line hover:bg-brand-50 hover:text-brand-700",
           )}
         >
           {opt.label}

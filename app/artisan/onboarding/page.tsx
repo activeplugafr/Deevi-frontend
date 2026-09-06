@@ -6,14 +6,26 @@ import { artisansApi, catalogueApi } from "@/lib/api";
 import { useAsync } from "@/lib/hooks";
 import { messageFor } from "@/lib/errors";
 import { useToast } from "@/components/ui/Toast";
-import { Card, Field, Input, Textarea } from "@/components/ui/primitives";
+import { Field, Input, Textarea } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/Button";
 import { BackLink } from "@/components/ui/bits";
+import { WorkspaceHeader, SectionCard, Stepper, StickyActionBar, RailLayout } from "@/components/ui/patterns";
 import { DocumentUploader } from "@/components/artisan/DocumentUploader";
 import { cn } from "@/lib/cn";
-import { IconCheck } from "@/components/ui/icons";
+import { IconCheck, IconUser, IconWrench, IconMapPin, IconShield } from "@/components/ui/icons";
 
 const STEPS = ["About you", "Services", "Areas", "Verification"] as const;
+const STEP_META = [
+  { icon: IconUser, title: "Tell us about yourself & your trade", desc: "Clients hire certified, reliable craftspeople. Establish your professional identity and build instant credibility." },
+  { icon: IconWrench, title: "What services do you offer?", desc: "Choose the trade skills and job categories you handle. This decides which jobs you're matched with." },
+  { icon: IconMapPin, title: "Where do you want to work?", desc: "Define your base operational zones across Lagos. You'll get job alerts for requests in these areas." },
+  { icon: IconShield, title: "Verify your identity & trade credentials", desc: "Upload a valid ID so clients know they can trust you. Documents are private and only seen by our team." },
+];
+const TIPS = [
+  "Match your legal name exactly to your NIN / BVN records.",
+  "List specific trade specialities — general profiles take longer to review.",
+  "Set an accurate base area so you aren't matched with faraway jobs.",
+];
 
 export default function ArtisanOnboarding() {
   const router = useRouter();
@@ -101,29 +113,56 @@ export default function ArtisanOnboarding() {
     setServiceIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
   }
 
+  const meta = STEP_META[step];
+  const pct = Math.round(((step + 1) / STEPS.length) * 100);
+
   return (
-    <div className="mx-auto max-w-2xl">
+    <div>
       <BackLink href="/artisan" label="Dashboard" />
 
-      {/* Stepper */}
-      <div className="mb-6 mt-3 flex items-center gap-2">
-        {STEPS.map((label, i) => (
-          <div key={label} className="flex flex-1 items-center gap-2">
-            <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold", i < step ? "bg-brand-600 text-white" : i === step ? "bg-brand-600 text-white ring-4 ring-brand-100" : "bg-canvas text-muted")}>
-              {i < step ? <IconCheck size={15} /> : i + 1}
-            </span>
-            {i < STEPS.length - 1 && <span className={cn("h-0.5 flex-1", i < step ? "bg-brand-600" : "bg-line")} />}
-          </div>
-        ))}
+      <div className="mb-6 mt-3 rounded-card border border-line bg-surface p-4 shadow-card">
+        <Stepper steps={[...STEPS]} current={step} />
       </div>
 
-      <Card className="p-5">
+      <WorkspaceHeader
+        eyebrow="Artisan Verification Onboarding"
+        title={`Step ${step + 1} of ${STEPS.length}: ${meta.title}`}
+        description={meta.desc}
+      />
+
+      <RailLayout
+        rail={
+          <>
+            <SectionCard title="Onboarding progress" description={`Step ${step + 1} of ${STEPS.length} · about ${STEPS.length - step} min left`}>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="font-semibold text-ink">{pct}%</span>
+                <span className="text-muted">complete</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-canvas">
+                <div className="h-full rounded-full bg-brand-600 transition-all" style={{ width: `${pct}%` }} />
+              </div>
+              {step < STEPS.length - 1 && (
+                <p className="mt-3 text-xs text-muted">
+                  <span className="font-medium text-brand-700">Next up: </span>
+                  {STEP_META[step + 1].title}
+                </p>
+              )}
+            </SectionCard>
+            <SectionCard icon={<IconShield size={18} />} title="Fast approval tips">
+              <ul className="space-y-2">
+                {TIPS.map((t) => (
+                  <li key={t} className="flex items-start gap-2 text-sm text-ink-soft">
+                    <IconCheck size={16} className="mt-0.5 shrink-0 text-brand-600" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </SectionCard>
+          </>
+        }
+      >
         {step === 0 && (
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-ink">Tell customers about yourself</h2>
-              <p className="mt-1 text-sm text-muted">This is what customers see when you apply to jobs.</p>
-            </div>
+          <SectionCard icon={<IconUser size={18} />} title="Legal & business profile" bodyClassName="space-y-4">
             <Field label="Headline" required hint="A short line about what you do.">
               <Input value={about.headline} onChange={(e) => setAbout({ ...about, headline: e.target.value })} placeholder="e.g. Experienced plumber — Lagos Mainland" />
             </Field>
@@ -144,15 +183,11 @@ export default function ArtisanOnboarding() {
                 <Input value={about.baseState} onChange={(e) => setAbout({ ...about, baseState: e.target.value })} placeholder="Lagos" />
               </Field>
             </div>
-          </section>
+          </SectionCard>
         )}
 
         {step === 1 && (
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-ink">What services do you offer?</h2>
-              <p className="mt-1 text-sm text-muted">Pick all that apply — this decides which jobs you see.</p>
-            </div>
+          <SectionCard icon={<IconWrench size={18} />} title="Core capabilities" description="Choose the specific trade skills you're equipped to handle." bodyClassName="space-y-4">
             <div className="max-h-[24rem] space-y-4 overflow-y-auto scroll-slim pr-1">
               {(tree ?? []).map((cat) => (
                 <div key={cat.id}>
@@ -179,15 +214,11 @@ export default function ArtisanOnboarding() {
               ))}
             </div>
             <p className="text-xs text-muted">{serviceIds.length} selected</p>
-          </section>
+          </SectionCard>
         )}
 
         {step === 2 && (
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-ink">Where can you work?</h2>
-              <p className="mt-1 text-sm text-muted">Add the areas you cover. Jobs nearby will be prioritised.</p>
-            </div>
+          <SectionCard icon={<IconMapPin size={18} />} title="Coverage & logistics" description="Define your base operational zones across Lagos." bodyClassName="space-y-4">
             <div className="space-y-3">
               {areas.map((a, i) => (
                 <div key={i} className="flex items-end gap-2">
@@ -208,35 +239,31 @@ export default function ArtisanOnboarding() {
             <Button variant="subtle" size="sm" onClick={() => setAreas((arr) => [...arr, { city: "", neighbourhood: "" }])}>
               Add another area
             </Button>
-          </section>
+          </SectionCard>
         )}
 
         {step === 3 && (
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-ink">Verify your identity</h2>
-              <p className="mt-1 text-sm text-muted">
-                Upload a valid ID so customers know they can trust you. Documents are private and only seen by our verification team.
-              </p>
-            </div>
+          <SectionCard icon={<IconShield size={18} />} title="Identity & trade credentials" description="Documents are private and only seen by our verification team." bodyClassName="space-y-4">
             <DocumentUploader />
-            <div className="rounded-lg border border-line bg-canvas p-3 text-xs text-muted">
+            <div className="rounded-control border border-line bg-canvas p-3 text-xs text-muted">
               When you submit, your profile goes to our team for review. You&apos;ll be notified once you&apos;re approved and can start applying to jobs.
             </div>
-          </section>
+          </SectionCard>
         )}
+      </RailLayout>
 
-        <div className="mt-6 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => (step === 0 ? router.push("/artisan") : setStep((s) => s - 1))} disabled={saving}>
-            {step === 0 ? "Cancel" : "Back"}
-          </Button>
-          {step < STEPS.length - 1 ? (
-            <Button onClick={next} disabled={!canContinue} loading={saving}>Continue</Button>
-          ) : (
-            <Button onClick={submitForVerification} loading={saving}>Submit for verification</Button>
-          )}
-        </div>
-      </Card>
+      <StickyActionBar
+        note={saving ? "Saving…" : `Step ${step + 1} of ${STEPS.length}`}
+      >
+        <Button variant="ghost" onClick={() => (step === 0 ? router.push("/artisan") : setStep((s) => s - 1))} disabled={saving}>
+          {step === 0 ? "Cancel" : "Back"}
+        </Button>
+        {step < STEPS.length - 1 ? (
+          <Button onClick={next} disabled={!canContinue} loading={saving}>Continue</Button>
+        ) : (
+          <Button onClick={submitForVerification} loading={saving}>Submit for verification</Button>
+        )}
+      </StickyActionBar>
     </div>
   );
 }

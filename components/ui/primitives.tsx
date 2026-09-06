@@ -4,22 +4,30 @@ import { cn } from "@/lib/cn";
 import { initials as toInitials } from "@/lib/format";
 import Image from "next/image";
 
-// ---- Card ------------------------------------------------------------------
+// ---- Card (Level 1 elevation) ---------------------------------------------
 
 export function Card({
   className,
   children,
   as: Tag = "div",
+  interactive,
   ...rest
-}: React.HTMLAttributes<HTMLElement> & { as?: React.ElementType }) {
+}: React.HTMLAttributes<HTMLElement> & { as?: React.ElementType; interactive?: boolean }) {
   return (
-    <Tag className={cn("rounded-xl border border-line bg-surface", className)} {...rest}>
+    <Tag
+      className={cn(
+        "rounded-card border border-line bg-surface shadow-card",
+        interactive && "transition hover:border-brand-200 hover:shadow-pop",
+        className,
+      )}
+      {...rest}
+    >
       {children}
     </Tag>
   );
 }
 
-// ---- Badge -----------------------------------------------------------------
+// ---- Badge / pill ----------------------------------------------------------
 
 export function Badge({
   children,
@@ -72,7 +80,7 @@ export function Avatar({
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center rounded-full bg-brand-100 font-semibold text-brand-700",
+        "inline-flex shrink-0 items-center justify-center rounded-full bg-brand-100 font-semibold text-brand-700",
         className,
       )}
       style={{ width: size, height: size, fontSize: size * 0.38 }}
@@ -91,7 +99,7 @@ export function VerifiedTick({ className }: { className?: string }) {
       viewBox="0 0 20 20"
       width="16"
       height="16"
-      className={cn("inline-block text-brand-600", className)}
+      className={cn("inline-block shrink-0 text-brand-600", className)}
       aria-label="Verified"
       role="img"
     >
@@ -101,6 +109,16 @@ export function VerifiedTick({ className }: { className?: string }) {
       />
       <path fill="#fff" d="m8.6 12.3-2-2 1-1 1 1 2.9-2.9 1 1z" />
     </svg>
+  );
+}
+
+/** Full "Verified" pill (blue wash + tick), matching the Stitch verified badge. */
+export function VerifiedPill({ label = "Verified", className }: { label?: string; className?: string }) {
+  return (
+    <Badge className={cn("bg-brand-50 text-brand-700", className)}>
+      <VerifiedTick className="!h-3.5 !w-3.5" />
+      {label}
+    </Badge>
   );
 }
 
@@ -139,8 +157,9 @@ export function Field({
   );
 }
 
+// 44px controls, 10px radius, brand focus glow (design system inputs spec).
 const controlBase =
-  "w-full rounded-lg border border-line bg-surface px-3 text-sm text-ink placeholder:text-muted focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition disabled:bg-canvas disabled:text-muted";
+  "w-full rounded-control border border-line bg-surface px-3.5 text-sm text-ink placeholder:text-muted outline-none transition focus:border-brand-600 focus:ring-[3px] focus:ring-brand-600/15 disabled:bg-canvas disabled:text-muted";
 
 export const Input = ({
   className,
@@ -148,7 +167,12 @@ export const Input = ({
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }) => (
   <input
-    className={cn(controlBase, "h-11", invalid && "border-danger-600 focus:border-danger-600 focus:ring-danger-600/20", className)}
+    className={cn(
+      controlBase,
+      "h-11",
+      invalid && "border-danger-600 focus:border-danger-600 focus:ring-danger-600/15",
+      className,
+    )}
     {...props}
   />
 );
@@ -169,7 +193,8 @@ export const Select = ({
   children,
   ...props
 }: React.SelectHTMLAttributes<HTMLSelectElement>) => (
-  <select className={cn(controlBase, "h-11 pr-8 appearance-none bg-no-repeat", className)}
+  <select
+    className={cn(controlBase, "h-11 pr-8 appearance-none bg-no-repeat", className)}
     style={{
       backgroundImage:
         "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7688' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",

@@ -8,12 +8,25 @@ import { useToast } from "@/components/ui/Toast";
 import { Card } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/Button";
 import { AsyncBoundary, EmptyState, SkeletonList } from "@/components/ui/states";
-import { PageHeader } from "@/components/ui/bits";
+import { WorkspaceHeader } from "@/components/ui/patterns";
 import { Pagination } from "@/components/ui/Pagination";
-import { IconBell } from "@/components/ui/icons";
+import { IconBell, IconCheck, IconStar, IconBriefcase } from "@/components/ui/icons";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import type { Notification } from "@/lib/types";
+
+/** Icon + tint for a notification's leading tile, derived from its type/priority. */
+function tileFor(n: Notification): { icon: typeof IconBell; className: string } {
+  const t = `${n.type} ${n.entity_type ?? ""}`.toUpperCase();
+  if (["URGENT", "HIGH"].includes((n.priority ?? "").toUpperCase()))
+    return { icon: IconBell, className: "bg-warn-50 text-warn-600" };
+  if (t.includes("REVIEW")) return { icon: IconStar, className: "bg-warn-50 text-warn-500" };
+  if (t.includes("APPLICATION") || t.includes("JOB") || t.includes("ENGAGEMENT"))
+    return { icon: IconBriefcase, className: "bg-brand-50 text-brand-600" };
+  if (t.includes("COMPLETE") || t.includes("APPROVED"))
+    return { icon: IconCheck, className: "bg-success-50 text-success-600" };
+  return { icon: IconBell, className: "bg-brand-50 text-brand-600" };
+}
 
 /** Maps a notification's entity to an in-app route for the given role base. */
 function linkFor(n: Notification, base: string): string | null {
@@ -54,11 +67,13 @@ export function NotificationsFeed({ base }: { base: string }) {
 
   return (
     <div>
-      <PageHeader
+      <WorkspaceHeader
+        eyebrow="Live Activity"
         title="Notifications"
-        action={
-          <Button variant="ghost" size="sm" onClick={markAll}>
-            Mark all read
+        description="Updates on your jobs, applications, messages and reviews."
+        actions={
+          <Button variant="secondary" size="sm" onClick={markAll}>
+            <IconCheck size={16} /> Mark all read
           </Button>
         }
       />
@@ -77,24 +92,34 @@ export function NotificationsFeed({ base }: { base: string }) {
         }
       >
         <div className="space-y-2">
-          {data?.items.map((n) => (
-            <Card
-              key={n.id}
-              as="button"
-              onClick={() => open(n)}
-              className={cn(
-                "flex w-full items-start gap-3 p-3.5 text-left transition hover:border-brand-200",
-                !n.read_at && "border-brand-200 bg-brand-50/40",
-              )}
-            >
-              {!n.read_at && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-600" />}
-              <div className={cn("min-w-0 flex-1", n.read_at && "pl-5")}>
-                <p className="text-sm font-semibold text-ink">{n.title}</p>
-                {n.body && <p className="mt-0.5 text-sm text-muted">{n.body}</p>}
-                <p className="mt-1 text-xs text-muted">{timeAgo(n.created_at)}</p>
-              </div>
-            </Card>
-          ))}
+          {data?.items.map((n) => {
+            const tile = tileFor(n);
+            const Icon = tile.icon;
+            return (
+              <Card
+                key={n.id}
+                as="button"
+                onClick={() => open(n)}
+                interactive
+                className={cn(
+                  "flex w-full items-start gap-3 p-3.5 text-left",
+                  !n.read_at && "border-brand-200 bg-brand-50/40",
+                )}
+              >
+                <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-control", tile.className)}>
+                  <Icon size={18} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-ink">{n.title}</p>
+                    {!n.read_at && <span className="h-2 w-2 shrink-0 rounded-full bg-brand-600" />}
+                  </div>
+                  {n.body && <p className="mt-0.5 text-sm text-muted">{n.body}</p>}
+                  <p className="mt-1 text-xs text-muted">{timeAgo(n.created_at)}</p>
+                </div>
+              </Card>
+            );
+          })}
         </div>
         {data && <Pagination meta={data.meta} page={page} onPage={setPage} />}
       </AsyncBoundary>

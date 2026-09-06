@@ -51,3 +51,5 @@ export const IconSend = wrap(<path d="M4 12 20 4l-6 16-3-7-7-1Z" />);
 export const IconSparkle = wrap(<path d="M12 3v6M12 15v6M3 12h6M15 12h6M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3" />);
 export const IconScissors = wrap(<><circle cx="6" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M8.5 8.5 20 18M8.5 15.5 20 6" /></>);
 export const IconTruck = wrap(<><rect x="1" y="6" width="14" height="10" rx="1" /><path d="M15 9h4l3 3v4h-7z" /><circle cx="6" cy="18" r="1.8" /><circle cx="18" cy="18" r="1.8" /></>);
+export const IconWallet = wrap(<><rect x="3" y="6" width="18" height="13" rx="2.5" /><path d="M3 10h18" /><circle cx="17" cy="14" r="1.3" fill="currentColor" stroke="none" /></>);
+export const IconBookmark = wrap(<path d="M6 4h12v17l-6-4-6 4z" />);

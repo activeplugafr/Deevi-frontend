@@ -1,50 +1,83 @@
 @import "tailwindcss";
 
 /*
-  Deevi design system
+  Deevi design system — "Reliable Service Fabric"
   ------------------------------------------------------------------
-  BLUE   = primary brand / action    BLACK = headings, strong text
-  WHITE  = surfaces / backgrounds     GRAY  = borders, muted, disabled
-  ORANGE = urgency / warning only (used extremely sparingly)
-  Light theme only for the MVP — a marketplace people trust reads best light.
+  Corporate-modern marketplace UI: Stripe precision, Airbnb warmth, Linear clarity.
+  BLUE  #1b47d6  primary brand / action        INK   #0b1220  headings, strong text
+  SLATE #354152  body copy                     MUTED #6b7688  captions, placeholders
+  WHITE surfaces / cards                        LINE  #e6e9ef  hairline borders
+  ORANGE #f5820b urgency ONLY                   canvas #f8f9ff cool app backdrop
+  Type: Geist (display / headings) + Inter (body, controls). Light theme.
+
+  Tokens below are the single source of truth — restyle here, not in components.
 */
 
 @theme {
+  /* Primary — Deevi blue + washes */
   --color-brand-50: #eef4ff;
   --color-brand-100: #dbe6ff;
   --color-brand-200: #bdd1ff;
   --color-brand-300: #90b2ff;
   --color-brand-400: #5b86fb;
   --color-brand-500: #2f62f0;
-  --color-brand-600: #1b47d6;
-  --color-brand-700: #1738ac;
-  --color-brand-800: #193291;
-  --color-brand-900: #1a2f76;
+  --color-brand-600: #1b47d6; /* primary */
+  --color-brand-700: #1738ac; /* hover */
+  --color-brand-800: #16309a;
+  --color-brand-900: #142a86;
+  --color-brand-950: #0030ad; /* deepest, feature-card gradients */
 
+  /* Neutrals / surfaces */
   --color-ink: #0b1220;
   --color-ink-soft: #354152;
   --color-muted: #6b7688;
   --color-line: #e6e9ef;
+  --color-line-strong: #d7deea;
   --color-surface: #ffffff;
-  --color-canvas: #f6f7f9;
+  --color-canvas: #f8f9ff; /* cool blue-white app backdrop */
+  --color-tint: #eff4ff; /* container-low wash */
+  --color-tint-2: #e6eeff; /* container wash */
 
-  --color-warn-50: #fff5ec;
+  /* Semantic */
+  --color-warn-50: #fff3e6;
+  --color-warn-100: #ffe6cc;
   --color-warn-500: #f5820b;
-  --color-warn-600: #d96c00;
+  --color-warn-600: #b54708;
+  --color-warn-700: #92370a;
 
   --color-success-50: #ecfdf3;
   --color-success-600: #067647;
+  --color-success-700: #055c37;
+
   --color-danger-50: #fef3f2;
-  --color-danger-600: #d92d20;
+  --color-danger-600: #d22d20;
+  --color-danger-700: #b42318;
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+  /* Type: Inter body default, Geist display for headings */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: var(--font-geist), var(--font-inter), ui-sans-serif, system-ui,
+    sans-serif;
 
-  --radius-lg: 0.75rem;
+  /* Radii — cards 12px, controls 10px, pills full */
+  --radius-control: 0.625rem;
+  --radius-card: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  /* Elevation — soft, diffused, hairline-first */
+  --shadow-card: 0 1px 2px 0 rgba(11, 18, 32, 0.04),
+    0 1px 3px 0 rgba(11, 18, 32, 0.02);
+  --shadow-pop: 0 4px 6px -1px rgba(11, 18, 32, 0.06),
+    0 2px 4px -2px rgba(11, 18, 32, 0.04);
+  --shadow-float: 0 10px 15px -3px rgba(11, 18, 32, 0.08),
+    0 4px 6px -4px rgba(11, 18, 32, 0.03);
+  --shadow-modal: 0 20px 25px -5px rgba(11, 18, 32, 0.12),
+    0 8px 10px -6px rgba(11, 18, 32, 0.04);
 }
 
 :root {
-  --background: #f6f7f9;
+  --background: #f8f9ff;
   --foreground: #0b1220;
   color-scheme: light;
 }
@@ -58,9 +91,33 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Respect users who ask for less motion. */
+/* Headings use the display face with tight tracking (Stitch spec). */
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+/* Tabular figures for money / metrics so currency columns stay aligned. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Small uppercase section label above page titles (Stitch "eyebrow"). */
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-brand-700);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -70,7 +127,6 @@ body {
   }
 }
 
-/* Consistent, visible focus for keyboard users. */
 :focus-visible {
   outline: 2px solid var(--color-brand-500);
   outline-offset: 2px;
@@ -86,7 +142,8 @@ body {
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: #eceef2;
+  background: #e8edf6;
+  border-radius: 0.5rem;
 }
 .skeleton::after {
   content: "";
@@ -96,13 +153,12 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.65),
     transparent
   );
   animation: deevi-shimmer 1.4s infinite;
 }
 
-/* Thin, unobtrusive scrollbars for scroll regions (messages, tables). */
 .scroll-slim {
   scrollbar-width: thin;
   scrollbar-color: #cbd2dc transparent;

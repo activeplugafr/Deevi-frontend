@@ -5,28 +5,33 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { Spinner } from "./Spinner";
 
-type Variant = "primary" | "secondary" | "ghost" | "danger" | "subtle";
+type Variant = "primary" | "secondary" | "ghost" | "danger" | "subtle" | "warn";
 type Size = "sm" | "md" | "lg";
 
+// Variant styling per the design system (10px radius, scale-down on press).
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 disabled:bg-brand-300",
+    "bg-brand-600 text-white shadow-card hover:bg-brand-700 active:scale-[0.98] disabled:bg-brand-300 disabled:shadow-none",
   secondary:
-    "bg-white text-ink border border-line hover:bg-canvas disabled:text-muted",
-  subtle: "bg-brand-50 text-brand-700 hover:bg-brand-100 disabled:opacity-60",
-  ghost: "bg-transparent text-ink-soft hover:bg-canvas disabled:text-muted",
+    "bg-surface text-ink border border-line hover:bg-canvas active:scale-[0.98] disabled:text-muted",
+  subtle:
+    "bg-brand-50 text-brand-700 hover:bg-brand-100 active:scale-[0.98] disabled:opacity-60",
+  ghost:
+    "bg-transparent text-ink-soft hover:bg-brand-50 hover:text-brand-700 disabled:text-muted",
   danger:
-    "bg-danger-600 text-white hover:bg-danger-600/90 disabled:bg-danger-600/40",
+    "bg-danger-600 text-white hover:bg-danger-700 active:scale-[0.98] disabled:bg-danger-600/40",
+  warn:
+    "bg-warn-500 text-white hover:bg-warn-600 active:scale-[0.98] disabled:bg-warn-500/50",
 };
 
 const SIZES: Record<Size, string> = {
-  sm: "h-9 px-3 text-sm rounded-lg gap-1.5",
-  md: "h-11 px-4 text-sm rounded-lg gap-2",
-  lg: "h-12 px-5 text-base rounded-xl gap-2",
+  sm: "h-9 px-3 text-sm rounded-control gap-1.5",
+  md: "h-11 px-4 text-sm rounded-control gap-2",
+  lg: "h-12 px-5 text-base rounded-control gap-2",
 };
 
 const base =
-  "inline-flex items-center justify-center font-semibold transition-colors disabled:cursor-not-allowed select-none focus-visible:outline-2";
+  "inline-flex items-center justify-center font-semibold transition-[background-color,transform,box-shadow] duration-150 disabled:cursor-not-allowed disabled:active:scale-100 select-none";
 
 interface CommonProps {
   variant?: Variant;
@@ -35,8 +40,7 @@ interface CommonProps {
   fullWidth?: boolean;
 }
 
-type ButtonProps = CommonProps &
-  React.ButtonHTMLAttributes<HTMLButtonElement>;
+type ButtonProps = CommonProps & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { variant = "primary", size = "md", loading, fullWidth, className, children, disabled, ...props },
