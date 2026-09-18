@@ -14,6 +14,7 @@ import { JobStatusBadge } from "@/components/ui/bits";
 import { IconSearch, IconChevronRight, IconWrench, IconScissors, IconTruck, IconGrid } from "@/components/ui/icons";
 import { timeAgo } from "@/lib/format";
 import type { CategoryGroup } from "@/lib/types";
+import { CategoryGroups } from "@/components/customer/Category";
 
 const GROUP_META: Record<CategoryGroup, { label: string; icon: React.ComponentType<{ size?: number; className?: string }> }> = {
   HOME_REPAIR: { label: "Home & repair", icon: IconWrench },
@@ -37,6 +38,8 @@ export default function CustomerHome() {
     [debounced],
   );
   const { data: recent } = useAsync(() => jobsApi.mine({ limit: 3 }), []);
+
+  console.log(tree, "tree")
 
   function goToJob(serviceId: string, serviceName: string) {
     const params = new URLSearchParams({ serviceId, serviceName });
@@ -111,35 +114,40 @@ export default function CustomerHome() {
             ))}
           </div>
         ) : (
-          <div className="space-y-5">
-            {(Object.keys(GROUP_META) as CategoryGroup[]).map((group) => {
-              const cats = (tree ?? []).filter((c) => c.group_key === group);
-              if (cats.length === 0) return null;
-              const Meta = GROUP_META[group];
-              return (
-                <div key={group}>
-                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-ink-soft">
-                    <Meta.icon size={18} className="text-brand-600" />
-                    {Meta.label}
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                    {cats.map((cat) => (
-                      <Link
-                        key={cat.id}
-                        href={`/discover/${cat.slug}`}
-                        className="group rounded-xl border border-line bg-surface p-3.5 transition hover:border-brand-200 hover:shadow-sm"
-                      >
-                        <p className="text-sm font-semibold text-ink">{cat.name}</p>
-                        <p className="mt-0.5 line-clamp-1 text-xs text-muted">
-                          {cat.services?.length ?? 0} service{(cat.services?.length ?? 0) === 1 ? "" : "s"}
-                        </p>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          // <div className="space-y-5">
+          //   {(Object.keys(GROUP_META) as CategoryGroup[]).map((group) => {
+          //     const cats = (tree ?? []).filter((c) => c.group_key === group);
+          //     if (cats.length === 0) return null;
+          //     const Meta = GROUP_META[group];
+          //     return (
+          //       <div key={group}>
+          //         <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-ink-soft">
+          //           <Meta.icon size={18} className="text-brand-600" />
+          //           {Meta.label}
+          //         </div>
+          //         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          //           {cats.map((cat) => (
+          //             <Link
+          //               key={cat.id}
+          //               href={`/discover/${cat.slug}`}
+          //               className="group rounded-xl border border-line bg-surface p-3.5 transition hover:border-brand-200 hover:shadow-sm"
+          //             >
+          //               <p className="text-sm font-semibold text-ink">{cat.name}</p>
+          //               <p className="mt-0.5 line-clamp-1 text-xs text-muted">
+          //                 {cat.services?.length ?? 0} service{(cat.services?.length ?? 0) === 1 ? "" : "s"}
+          //               </p>
+          //             </Link>
+          //           ))}
+          //         </div>
+          //       </div>
+          //     );
+          //   })}
+          // </div>
+
+          <CategoryGroups
+            tree={tree}
+            locationName="Port Harcourt"
+          />
         )}
       </section>
 
