@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Deevi frontend
 
-## Getting Started
+The Next.js frontend for **Deevi**, a two-sided local-services marketplace for Nigeria.
+Customers post jobs, verified artisans apply, the customer chooses, they chat, the work gets
+done, and the customer leaves a review.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router) · React 19 · TypeScript
+- Tailwind CSS v4 (design tokens in `app/globals.css`)
+- Talks to the Deevi NestJS backend (see `swagger.json`) — the backend is the source of truth.
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local   # then set DEEVI_API_URL if your backend isn't on :3001
+npm install
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The browser never calls the backend directly. Next.js proxies `/bff/*` to `DEEVI_API_URL/*`
+(see `next.config.ts`), which removes CORS and keeps the backend URL server-side.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable            | Purpose                                              |
+| ------------------- | ---------------------------------------------------- |
+| `DEEVI_API_URL`     | Base URL of the Deevi backend (proxied via `/bff`).  |
+| `NEXT_PUBLIC_APP_URL`| Public app URL, used for OAuth redirects.           |
 
-## Learn More
+## Project layout
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+  (auth)/         login, signup, forgot-password
+  (customer)/     home, jobs (+ new wizard, detail), messages, artisans, profile, settings
+  artisan/        feed (verification-gated), onboarding, jobs, applications, active, profile
+  admin/          dashboard, verification, users, jobs, reports, catalogue
+components/        ui/ (design system), layout/, jobs/, artisan/, messaging/, shared/, admin/
+lib/
+  api/            HTTP client (+ auto token refresh) and typed per-domain API clients
+  auth/           session store + AuthProvider/useAuth (roles: CUSTOMER/ARTISAN/ADMIN)
+  types.ts        types derived from the backend OpenAPI contract
+  errors.ts       backend error `code` → human-readable UI copy
+  hooks.ts        useAsync / usePaginated / useDebounced
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev       # dev server
+npm run build     # production build
+npm run start     # serve the production build
+npm run lint      # eslint
+```
 
-## Deploy on Vercel
+## Scope
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This build matches the current lean backend MVP. Dormant/future features (payments, boosts,
+subscriptions, AI matching, live tracking) are intentionally **not** built — `GET /health`
+lists what's dormant. Deevi does not process job payments; customers and artisans settle
+directly (`payment_mode: OFFLINE`).

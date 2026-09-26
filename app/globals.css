@@ -1,26 +1,173 @@
 @import "tailwindcss";
 
+/*
+  Deevi design system — "Reliable Service Fabric"
+  ------------------------------------------------------------------
+  Corporate-modern marketplace UI: Stripe precision, Airbnb warmth, Linear clarity.
+  BLUE  #1b47d6  primary brand / action        INK   #0b1220  headings, strong text
+  SLATE #354152  body copy                     MUTED #6b7688  captions, placeholders
+  WHITE surfaces / cards                        LINE  #e6e9ef  hairline borders
+  ORANGE #f5820b urgency ONLY                   canvas #f8f9ff cool app backdrop
+  Type: Geist (display / headings) + Inter (body, controls). Light theme.
+
+  Tokens below are the single source of truth — restyle here, not in components.
+*/
+
+@theme {
+  /* Primary — Deevi blue + washes */
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #dbe6ff;
+  --color-brand-200: #bdd1ff;
+  --color-brand-300: #90b2ff;
+  --color-brand-400: #5b86fb;
+  --color-brand-500: #2f62f0;
+  --color-brand-600: #1b47d6; /* primary */
+  --color-brand-700: #1738ac; /* hover */
+  --color-brand-800: #16309a;
+  --color-brand-900: #142a86;
+  --color-brand-950: #0030ad; /* deepest, feature-card gradients */
+
+  /* Neutrals / surfaces */
+  --color-ink: #0b1220;
+  --color-ink-soft: #354152;
+  --color-muted: #6b7688;
+  --color-line: #e6e9ef;
+  --color-line-strong: #d7deea;
+  --color-surface: #ffffff;
+  --color-canvas: #f8f9ff; /* cool blue-white app backdrop */
+  --color-tint: #eff4ff; /* container-low wash */
+  --color-tint-2: #e6eeff; /* container wash */
+
+  /* Semantic */
+  --color-warn-50: #fff3e6;
+  --color-warn-100: #ffe6cc;
+  --color-warn-500: #f5820b;
+  --color-warn-600: #b54708;
+  --color-warn-700: #92370a;
+
+  --color-success-50: #ecfdf3;
+  --color-success-600: #067647;
+  --color-success-700: #055c37;
+
+  --color-danger-50: #fef3f2;
+  --color-danger-600: #d22d20;
+  --color-danger-700: #b42318;
+
+  /* Type: Inter body default, Geist display for headings */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: var(--font-geist), var(--font-inter), ui-sans-serif, system-ui,
+    sans-serif;
+
+  /* Radii — cards 12px, controls 10px, pills full */
+  --radius-control: 0.625rem;
+  --radius-card: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  /* Elevation — soft, diffused, hairline-first */
+  --shadow-card: 0 1px 2px 0 rgba(11, 18, 32, 0.04),
+    0 1px 3px 0 rgba(11, 18, 32, 0.02);
+  --shadow-pop: 0 4px 6px -1px rgba(11, 18, 32, 0.06),
+    0 2px 4px -2px rgba(11, 18, 32, 0.04);
+  --shadow-float: 0 10px 15px -3px rgba(11, 18, 32, 0.08),
+    0 4px 6px -4px rgba(11, 18, 32, 0.03);
+  --shadow-modal: 0 20px 25px -5px rgba(11, 18, 32, 0.12),
+    0 8px 10px -6px rgba(11, 18, 32, 0.04);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8f9ff;
+  --foreground: #0b1220;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings use the display face with tight tracking (Stitch spec). */
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+/* Tabular figures for money / metrics so currency columns stay aligned. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Small uppercase section label above page titles (Stitch "eyebrow"). */
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-brand-700);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@keyframes deevi-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #e8edf6;
+  border-radius: 0.5rem;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.65),
+    transparent
+  );
+  animation: deevi-shimmer 1.4s infinite;
+}
+
+.scroll-slim {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd2dc transparent;
+}
+.scroll-slim::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: #cbd2dc;
+  border-radius: 999px;
 }

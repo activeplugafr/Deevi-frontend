@@ -1,0 +1,13 @@
+{
+  "name": "Deevi",
+  "short_name": "Deevi",
+  "description": "Find trusted local artisans across Nigeria.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f7f9",
+  "theme_color": "#1b47d6",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
