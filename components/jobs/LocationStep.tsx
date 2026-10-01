@@ -55,6 +55,59 @@ export function LocationStep({
     );
   }
 
+  //   async function useDevice() {
+  //   if (!("geolocation" in navigator)) {
+  //     setGeoStatus("error");
+  //     return;
+  //   }
+
+  //   setGeoStatus("loading");
+
+  //   navigator.geolocation.getCurrentPosition(
+  //     async (pos) => {
+  //       const { latitude, longitude } = pos.coords;
+
+  //       try {
+  //         const response = await fetch(
+  //           `/api/locations/reverse-geocode?lat=${latitude}&lon=${longitude}`
+  //         );
+
+  //         if (!response.ok) {
+  //           throw new Error("Reverse geocoding failed");
+  //         }
+
+  //         const location = await response.json();
+
+  //         set({
+  //           latitude,
+  //           longitude,
+  //           source: "DEVICE",
+  //           savedLocationId: undefined,
+  //           neighbourhood: location.neighbourhood ?? undefined,
+  //           city: location.city ?? undefined,
+  //           state: location.state ?? undefined,
+  //           addressLine: location.addressLine ?? undefined,
+  //           locationNotes: location.landmark ?? undefined,
+  //         });
+
+  //         setGeoStatus("done");
+  //       } catch {
+  //         // GPS is still useful even if address lookup fails.
+  //         set({
+  //           latitude,
+  //           longitude,
+  //           source: "DEVICE",
+  //           savedLocationId: undefined,
+  //         });
+
+  //         setGeoStatus("done");
+  //       }
+  //     },
+  //     () => setGeoStatus("error"),
+  //     { enableHighAccuracy: true, timeout: 10000 },
+  //   );
+  // }
+
   return (
     <div className="space-y-4">
       {saved && saved.length > 0 && (
@@ -144,7 +197,7 @@ export function LocationStep({
         />
       </Field>
 
-      <div className="rounded-lg border border-line bg-canvas p-3">
+      {/* <div className="rounded-lg border border-line bg-canvas p-3">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm font-medium text-ink">Pin your exact spot</p>
@@ -166,7 +219,7 @@ export function LocationStep({
             Couldn&apos;t get your location. You can still enter the area manually above.
           </p>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

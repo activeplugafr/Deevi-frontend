@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { homePathFor, useAuth } from "@/lib/auth/context";
@@ -8,6 +8,7 @@ import { messageFor } from "@/lib/errors";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/primitives";
 import { GoogleButton } from "@/components/auth/GoogleButton";
+import { useToast } from "@/components/ui/Toast";
 
 function LoginForm() {
   const { login } = useAuth();
@@ -19,6 +20,15 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
+
+  useEffect(() => {
+    if (params.get("registered") === "true") {
+      toast.success(
+        "Account created. Please confirm your email, then log in."
+      );
+    }
+  }, [params, toast]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();

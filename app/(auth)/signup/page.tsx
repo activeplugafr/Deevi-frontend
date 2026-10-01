@@ -46,8 +46,8 @@ function SignupForm() {
         router.replace(homePathFor(role));
       } else {
         // Email confirmation required — no session issued.
-        toast.success("Account created. Please confirm your email, then log in.");
-        router.replace("/login");
+        // toast.success("Account created. Please confirm your email, then log in.");
+        router.replace("/login?registered=true");
       }
     } catch (err) {
       setError(messageFor(err));
