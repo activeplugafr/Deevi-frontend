@@ -24,7 +24,9 @@ export function AccountMenu() {
 
   if (!user) return null;
 
-  const base = role === "ARTISAN" ? "/artisan" : role === "ADMIN" ? "/admin" : "/home";
+  const base = role === "ARTISAN" ? "/artisan" : role === "ADMIN" ? "/admin" : "";
+  const profileHref = role === "ARTISAN" ? "/artisan/profile" : role === "ADMIN" ? "/admin/profile" : "/profile";
+  const settingsHref = role === "ARTISAN" ? "/artisan/settings" : role === "ADMIN" ? "/admin/settings" : "/settings";
 
   async function onLogout() {
     setOpen(false);
@@ -57,7 +59,7 @@ export function AccountMenu() {
           </div>
           <div className="p-1">
             <Link
-              href={`${base}/profile`}
+              href={profileHref}
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-soft hover:bg-canvas"
               role="menuitem"
@@ -65,7 +67,7 @@ export function AccountMenu() {
               <IconUser size={18} className="text-muted" /> Profile
             </Link>
             <Link
-              href={`${base}/settings`}
+              href={settingsHref}
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-soft hover:bg-canvas"
               role="menuitem"

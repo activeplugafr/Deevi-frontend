@@ -17,12 +17,15 @@ export interface NavItem {
   icon: React.ComponentType<{ size?: number; className?: string }>;
   badge?: number;
   primary?: boolean; // highlighted action in the mobile bottom bar (e.g. Post a job)
+  exact?: boolean; // if true, only highlight when pathname === href exactly
 }
 
 function isActive(pathname: string, href: string, exact?: boolean): boolean {
   if (href === pathname) return true;
   if (exact) return false;
-  return href !== "/" && pathname.startsWith(href + "/");
+  // Prevent /jobs from matching /jobs/new (sub-path that has its own nav item)
+  if (href !== "/" && pathname.startsWith(href + "/")) return true;
+  return false;
 }
 
 /**
@@ -75,7 +78,7 @@ export function AppShell({
           )}
           <div className="space-y-1">
             {nav.map((item) => {
-              const active = isActive(pathname, item.href, item.href === exactHref);
+              const active = isActive(pathname, item.href, item.href === exactHref || item.exact);
               const Icon = item.icon;
               return (
                 <Link
@@ -155,7 +158,7 @@ export function AppShell({
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-md items-stretch justify-around">
           {nav.slice(0, 5).map((item) => {
-            const active = isActive(pathname, item.href, item.href === exactHref);
+            const active = isActive(pathname, item.href, item.href === exactHref || item.exact);
             const Icon = item.icon;
             return (
               <Link

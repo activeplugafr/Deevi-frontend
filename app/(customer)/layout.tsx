@@ -11,16 +11,20 @@ import {
   IconUser,
   IconMapPin,
   IconBookmark,
+  IconUsers,
+  IconSettings,
 } from "@/components/ui/icons";
 import { useUnreadMessages } from "@/lib/useUnread";
 
 const nav: NavItem[] = [
   { href: "/home", label: "Discover", icon: IconSearch },
-  { href: "/jobs", label: "My jobs", icon: IconBriefcase },
-  { href: "/jobs/new", label: "Post", icon: IconPlus, primary: true },
+  { href: "/artisans", label: "Artisans", icon: IconUsers },
+  { href: "/jobs", label: "My Jobs", icon: IconBriefcase, exact: true },
+  { href: "/jobs/new", label: "Post", icon: IconPlus, primary: true, exact: true },
   { href: "/messages", label: "Messages", icon: IconChat },
-  { href: "/profile", label: "Profile", icon: IconUser },
   { href: "/saved-artisans", label: "Saved Artisans", icon: IconBookmark },
+  { href: "/profile", label: "Profile", icon: IconUser },
+  { href: "/settings", label: "Settings", icon: IconSettings },
 ];
 
 /** Desktop top-bar content for the customer app: location + a post CTA. */

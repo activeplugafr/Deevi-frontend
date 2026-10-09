@@ -18,11 +18,12 @@ export function NotificationsBell() {
   }, []);
 
   const count = data?.count ?? data?.unread ?? 0;
-  const base = role === "ARTISAN" ? "/artisan" : role === "ADMIN" ? "/admin" : "/home";
+  // Customers: /notifications (not /home/notifications), artisans: /artisan/notifications, admin: /admin/notifications
+  const notifHref = role === "ARTISAN" ? "/artisan/notifications" : role === "ADMIN" ? "/admin/notifications" : "/notifications";
 
   return (
     <Link
-      href={`${base}/notifications`}
+      href={notifHref}
       className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink-soft hover:bg-canvas"
       aria-label={count ? `Notifications, ${count} unread` : "Notifications"}
     >

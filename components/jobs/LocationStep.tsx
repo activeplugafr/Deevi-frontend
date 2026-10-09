@@ -6,7 +6,7 @@ import { useAsync } from "@/lib/hooks";
 import { Field, Input, Textarea } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
-import { IconMapPin, IconCheck } from "@/components/ui/icons";
+import { IconMapPin, IconCheck, IconX } from "@/components/ui/icons";
 import type { ServiceLocationInput } from "@/lib/types";
 
 /**
@@ -126,7 +126,7 @@ export function LocationStep({
                       source: "SAVED",
                       neighbourhood: loc.neighbourhood ?? undefined,
                       city: loc.city ?? undefined,
-                      state: loc.state ?? undefined,
+                      state: "Lagos",
                     })
                   }
                   className={cn(
@@ -146,7 +146,16 @@ export function LocationStep({
               );
             })}
           </div>
-          <p className="mt-2 text-xs text-muted">Or enter the job&apos;s location below.</p>
+          {value.savedLocationId && (
+            <button
+              type="button"
+              onClick={() => onChange({ country: "NG", source: "MANUAL", state: "Lagos" })}
+              className="mt-2 flex items-center gap-1.5 text-xs font-medium text-danger-600 hover:text-danger-700"
+            >
+              <IconX size={14} /> Clear saved location
+            </button>
+          )}
+          {!value.savedLocationId && <p className="mt-2 text-xs text-muted">Or enter the job&apos;s location below.</p>}
         </div>
       )}
 
@@ -157,6 +166,7 @@ export function LocationStep({
             value={value.neighbourhood ?? ""}
             onChange={(e) => set({ neighbourhood: e.target.value, savedLocationId: undefined, source: value.source === "DEVICE" ? "DEVICE" : "MANUAL" })}
             placeholder="e.g. Obalende"
+            disabled={!!value.savedLocationId}
           />
         </Field>
         <Field label="City" htmlFor="city" required>
@@ -165,16 +175,20 @@ export function LocationStep({
             value={value.city ?? ""}
             onChange={(e) => set({ city: e.target.value, savedLocationId: undefined })}
             placeholder="e.g. Lagos Island"
+            disabled={!!value.savedLocationId}
           />
         </Field>
       </div>
       <Field label="State" htmlFor="state">
+        {/* State is locked to Lagos for now */}
         <Input
           id="state"
-          value={value.state ?? ""}
-          onChange={(e) => set({ state: e.target.value })}
-          placeholder="e.g. Lagos"
+          value="Lagos"
+          readOnly
+          disabled
+          className="cursor-not-allowed select-none"
         />
+        <p className="mt-1 text-xs text-muted">Currently operating in Lagos State only.</p>
       </Field>
       <Field
         label="Street address"
@@ -186,6 +200,7 @@ export function LocationStep({
           value={value.addressLine ?? ""}
           onChange={(e) => set({ addressLine: e.target.value })}
           placeholder="House number and street"
+          disabled={!!value.savedLocationId}
         />
       </Field>
       <Field label="Landmark / access notes" htmlFor="notes" hint="Optional. Also kept private.">
@@ -194,6 +209,7 @@ export function LocationStep({
           value={value.locationNotes ?? ""}
           onChange={(e) => set({ locationNotes: e.target.value })}
           placeholder="e.g. Blue gate opposite the pharmacy"
+          disabled={!!value.savedLocationId}
         />
       </Field>
 
