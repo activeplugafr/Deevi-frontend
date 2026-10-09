@@ -441,6 +441,13 @@ export interface ArtisanService {
   id?: string;
   service_id: string;
   service_name?: string;
+  name?: string;
+  services?: {
+    category_id: string;
+    id: string;
+    name: string;
+    slug: string;
+  }
   sub_service_id?: string | null;
   price_min?: number | null;
   price_max?: number | null;

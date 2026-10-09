@@ -23,6 +23,7 @@ export default function ArtisanProfilePage() {
   const [editServices, setEditServices] = useState(false);
   const [editAreas, setEditAreas] = useState(false);
 
+
   if (loading) return <Loading label="Loading your profile…" />;
   if (error || !me) return <ErrorState error={error} onRetry={reload} />;
 
@@ -123,7 +124,7 @@ export default function ArtisanProfilePage() {
           <div className="mt-3 flex flex-wrap gap-2">
             {me.services.map((s, i) => (
               <Badge key={s.id ?? i} className="border border-line bg-canvas text-ink-soft">
-                {s.service_name ?? "Service"}
+                {s.services?.name ?? "Service"}
                 {s.price_min != null && <span className="ml-1 text-muted">· from {naira(s.price_min)}</span>}
               </Badge>
             ))}
