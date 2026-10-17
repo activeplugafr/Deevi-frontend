@@ -6,8 +6,9 @@ import { useAsync } from "@/lib/hooks";
 import { Field, Input, Textarea } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
-import { IconMapPin, IconCheck, IconX } from "@/components/ui/icons";
+import { IconMapPin, IconCheck } from "@/components/ui/icons";
 import type { ServiceLocationInput } from "@/lib/types";
+import { X } from "lucide-react";
 
 /**
  * Job location capture. This is the JOB's location — deliberately independent
@@ -152,7 +153,7 @@ export function LocationStep({
               onClick={() => onChange({ country: "NG", source: "MANUAL", state: "Lagos" })}
               className="mt-2 flex items-center gap-1.5 text-xs font-medium text-danger-600 hover:text-danger-700"
             >
-              <IconX size={14} /> Clear saved location
+              <X size={14} /> Clear saved location
             </button>
           )}
           {!value.savedLocationId && <p className="mt-2 text-xs text-muted">Or enter the job&apos;s location below.</p>}

@@ -63,8 +63,8 @@ export function JobFeed() {
                 </div>
               </div>
             </SectionCard>
-            <FeatureCard eyebrow="Get more requests" title="Widen your service areas">
-              Adding nearby areas and increasing your travel distance unlocks more jobs in your feed.
+            <FeatureCard eyebrow="Get more requests" title="Widen your service areas" className="flex-col">
+              <p>Adding nearby areas and increasing your travel distance unlocks more jobs in your feed. </p>
               <LinkButton href="/artisan/profile" variant="secondary" size="sm" className="mt-3">
                 Edit coverage
               </LinkButton>

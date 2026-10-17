@@ -90,7 +90,7 @@ export default function SavedArtisansPage() {
               </div>
             </div>
           </div>
-          <Button fullWidth onClick={preview}>Explore Lekki artisans</Button>
+          <Button fullWidth onClick={preview}>Explore More Artisans</Button>
         </Card>
       </div>
 
