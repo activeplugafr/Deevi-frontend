@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { customersApi } from "@/lib/api";
 import { useAsync } from "@/lib/hooks";
-import { Field, Input, Textarea } from "@/components/ui/primitives";
+import { Field, Input, Select, Textarea } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { IconMapPin, IconCheck } from "@/components/ui/icons";
@@ -17,6 +17,24 @@ import { X } from "lucide-react";
  * map picker; "Use my current location" captures real device GPS coordinates
  * (source DEVICE) and we're honest that the area still needs typing.
  */
+
+
+type Lga = {
+  id: string;
+  name_en: string;
+  slug: string;
+  parent_id: string;
+};
+
+const STATE_OPTIONS = [
+  { name: "Lagos", id: "NG025", slug: "lagos-ng025" },
+  { name: "Ogun", id: "NG028", slug: "ogun-ng028" },
+];
+
+const LOCATION_API = "https://api.openadmindata.org/api/v1";
+
+
+
 export function LocationStep({
   value,
   onChange,
@@ -33,81 +51,64 @@ export function LocationStep({
   }, []);
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
 
-  const set = (patch: Partial<ServiceLocationInput>) => onChange({ ...value, ...patch, country: "NG", });
+  const [lgas, setLgas] = useState<Lga[]>([]);
+  const [lgaLoading, setLgaLoading] = useState(false);
+  const [lgaError, setLgaError] = useState("");
 
-  function useDevice() {
-    if (!("geolocation" in navigator)) {
-      setGeoStatus("error");
+  useEffect(() => {
+    const selectedState = STATE_OPTIONS.find(
+      (item) => item.name === value.state
+    );
+
+    if (!selectedState) {
+      setLgas([]);
+      setLgaError("");
+      setLgaLoading(false);
       return;
     }
-    setGeoStatus("loading");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        set({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          source: "DEVICE",
-          savedLocationId: undefined,
-        });
-        setGeoStatus("done");
-      },
-      () => setGeoStatus("error"),
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
-  }
 
-  //   async function useDevice() {
-  //   if (!("geolocation" in navigator)) {
-  //     setGeoStatus("error");
-  //     return;
-  //   }
+    const controller = new AbortController();
 
-  //   setGeoStatus("loading");
+    async function fetchLgas() {
+      setLgaLoading(true);
+      setLgaError("");
+      setLgas([]);
 
-  //   navigator.geolocation.getCurrentPosition(
-  //     async (pos) => {
-  //       const { latitude, longitude } = pos.coords;
+      try {
+        const response = await fetch(
+          `${LOCATION_API}/ng/state/${selectedState?.slug}.json`,
+          { signal: controller.signal }
+        );
 
-  //       try {
-  //         const response = await fetch(
-  //           `/api/locations/reverse-geocode?lat=${latitude}&lon=${longitude}`
-  //         );
+        if (!response.ok) {
+          throw new Error("Could not load LGAs.");
+        }
 
-  //         if (!response.ok) {
-  //           throw new Error("Reverse geocoding failed");
-  //         }
+        const data = await response.json();
+        setLgas(data.children?.entities ?? []);
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
 
-  //         const location = await response.json();
+        setLgaError("Unable to load LGAs. Please try again.");
+      } finally {
+        if (!controller.signal.aborted) {
+          setLgaLoading(false);
+        }
+      }
+    }
 
-  //         set({
-  //           latitude,
-  //           longitude,
-  //           source: "DEVICE",
-  //           savedLocationId: undefined,
-  //           neighbourhood: location.neighbourhood ?? undefined,
-  //           city: location.city ?? undefined,
-  //           state: location.state ?? undefined,
-  //           addressLine: location.addressLine ?? undefined,
-  //           locationNotes: location.landmark ?? undefined,
-  //         });
+    fetchLgas();
 
-  //         setGeoStatus("done");
-  //       } catch {
-  //         // GPS is still useful even if address lookup fails.
-  //         set({
-  //           latitude,
-  //           longitude,
-  //           source: "DEVICE",
-  //           savedLocationId: undefined,
-  //         });
+    return () => controller.abort();
+  }, [value.state]);
 
-  //         setGeoStatus("done");
-  //       }
-  //     },
-  //     () => setGeoStatus("error"),
-  //     { enableHighAccuracy: true, timeout: 10000 },
-  //   );
-  // }
+
+  const set = (patch: Partial<ServiceLocationInput>) => onChange({ ...value, ...patch, country: "NG", });
+
+
+
 
   return (
     <div className="space-y-4">
@@ -161,6 +162,116 @@ export function LocationStep({
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="State" htmlFor="state" >
+          {/* State is locked to Lagos for now */}
+          {/* <Input
+            id="state"
+            value="Lagos"
+            readOnly
+            disabled
+            className="cursor-not-allowed select-none"
+          /> */}
+
+
+          <Select
+            value={value.state ?? ""}
+            onChange={(e) => {
+              const state = e.target.value;
+
+              set({
+                state,
+                city: state === "Ogun" ? "Ado-Odo/Ota" : "",
+                neighbourhood: undefined,
+                savedLocationId: undefined,
+                source: "MANUAL",
+              });
+            }}
+          >
+            <option value="">Select State</option>
+            {STATE_OPTIONS.map((state) => (
+              <option key={state.id} value={state.name}>
+                {state.name}
+              </option>
+            ))}
+          </Select>
+
+
+          <p className="mt-1 text-xs text-muted">Currently operating in Lagos and Ogun State only.</p>
+        </Field>
+        {/* <Field label="City" htmlFor="city" required>
+          <Input
+            id="city"
+            value={value.city ?? ""}
+            onChange={(e) => set({ city: e.target.value, savedLocationId: undefined })}
+            placeholder="e.g. Lagos Island"
+            disabled={!!value.savedLocationId}
+          />
+        </Field> */}
+
+
+        <Field label="Local Government Area" htmlFor="lga" required>
+
+          <Select
+            className={value.state === "Ogun" ? "cursor-not-allowed" : ""}
+            value={value.city ?? ""}
+            disabled={
+              !value.state ||
+              lgaLoading ||
+              !!value.savedLocationId ||
+              value.state === "Ogun"
+            }
+            onChange={(e) =>
+              set({
+                city: e.target.value,
+                savedLocationId: undefined,
+              })
+            }
+          >
+            <option value="">
+              {!value.state
+                ? "Select a state first"
+                : lgaLoading
+                  ? "Loading LGAs..."
+                  : "Select LGA"}
+            </option>
+
+            {value.state === "Ogun" ? (
+              <option value="Ado-Odo/Ota">Ado-Odo/Ota</option>
+            ) : (
+              lgas.map((lga) => (
+                <option key={lga.id} value={lga.name_en}>
+                  {lga.name_en}
+                </option>
+              ))
+            )}
+          </Select>
+
+
+          {lgaError && (
+            <div className="mt-1 text-sm text-danger-600">
+              {lgaError}
+              <button
+                type="button"
+                className="ml-2 underline"
+                onClick={() => {
+                  const state = STATE_OPTIONS.find(
+                    (item) => item.name === value.state
+                  );
+                  if (state) {
+                    setLgaError("");
+                    setLgas([]);
+                    // Changing state triggers the effect only if its value changes.
+                    // For manual retry, use the retry implementation below.
+                  }
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          )}
+        </Field>
+
+
         <Field label="Neighbourhood / area" htmlFor="nbh">
           <Input
             id="nbh"
@@ -170,27 +281,9 @@ export function LocationStep({
             disabled={!!value.savedLocationId}
           />
         </Field>
-        <Field label="City" htmlFor="city" required>
-          <Input
-            id="city"
-            value={value.city ?? ""}
-            onChange={(e) => set({ city: e.target.value, savedLocationId: undefined })}
-            placeholder="e.g. Lagos Island"
-            disabled={!!value.savedLocationId}
-          />
-        </Field>
+
       </div>
-      <Field label="State" htmlFor="state">
-        {/* State is locked to Lagos for now */}
-        <Input
-          id="state"
-          value="Lagos"
-          readOnly
-          disabled
-          className="cursor-not-allowed select-none"
-        />
-        <p className="mt-1 text-xs text-muted">Currently operating in Lagos State only.</p>
-      </Field>
+
       <Field
         label="Street address"
         htmlFor="addr"
@@ -240,3 +333,88 @@ export function LocationStep({
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+// function useDevice() {
+//   if (!("geolocation" in navigator)) {
+//     setGeoStatus("error");
+//     return;
+//   }
+//   setGeoStatus("loading");
+//   navigator.geolocation.getCurrentPosition(
+//     (pos) => {
+//       set({
+//         latitude: pos.coords.latitude,
+//         longitude: pos.coords.longitude,
+//         source: "DEVICE",
+//         savedLocationId: undefined,
+//       });
+//       setGeoStatus("done");
+//     },
+//     () => setGeoStatus("error"),
+//     { enableHighAccuracy: true, timeout: 10000 },
+//   );
+// }
+
+
+
+
+//   async function useDevice() {
+//   if (!("geolocation" in navigator)) {
+//     setGeoStatus("error");
+//     return;
+//   }
+
+//   setGeoStatus("loading");
+
+//   navigator.geolocation.getCurrentPosition(
+//     async (pos) => {
+//       const { latitude, longitude } = pos.coords;
+
+//       try {
+//         const response = await fetch(
+//           `/api/locations/reverse-geocode?lat=${latitude}&lon=${longitude}`
+//         );
+
+//         if (!response.ok) {
+//           throw new Error("Reverse geocoding failed");
+//         }
+
+//         const location = await response.json();
+
+//         set({
+//           latitude,
+//           longitude,
+//           source: "DEVICE",
+//           savedLocationId: undefined,
+//           neighbourhood: location.neighbourhood ?? undefined,
+//           city: location.city ?? undefined,
+//           state: location.state ?? undefined,
+//           addressLine: location.addressLine ?? undefined,
+//           locationNotes: location.landmark ?? undefined,
+//         });
+
+//         setGeoStatus("done");
+//       } catch {
+//         // GPS is still useful even if address lookup fails.
+//         set({
+//           latitude,
+//           longitude,
+//           source: "DEVICE",
+//           savedLocationId: undefined,
+//         });
+
+//         setGeoStatus("done");
+//       }
+//     },
+//     () => setGeoStatus("error"),
+//     { enableHighAccuracy: true, timeout: 10000 },
+//   );
+// }
