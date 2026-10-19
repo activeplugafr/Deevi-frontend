@@ -203,7 +203,7 @@ export const applicationsApi = {
 // ---- Messaging -------------------------------------------------------------
 
 export const messagesApi = {
-  open: (input: { jobPostId: string; artisanId?: string; message?: string }) =>
+  open: (input: { jobPostId: string; artisanId: string; message?: string }) =>
     http.post<Conversation>("/conversations", input),
   list: (params?: { page?: number; limit?: number; unreadOnly?: boolean }) =>
     http.get<Paginated<Conversation>>("/conversations", params),

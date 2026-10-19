@@ -55,6 +55,10 @@ export function ApplicationCard({
   }
 
   async function message() {
+    if (!artisanId) {
+      toast.error("The artisan details are incomplete. Refresh the page and try again.");
+      return;
+    }
     setBusy("message");
     try {
       const convo = await messagesApi.open({ jobPostId, artisanId });

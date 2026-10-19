@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { jobsApi, messagesApi } from "@/lib/api";
+import { jobsApi } from "@/lib/api";
 import { usePaginated } from "@/lib/hooks";
 import { messageFor } from "@/lib/errors";
 import { useToast } from "@/components/ui/Toast";
@@ -12,15 +11,14 @@ import { AsyncBoundary, EmptyState, SkeletonList } from "@/components/ui/states"
 import { PageHeader, JobStatusBadge } from "@/components/ui/bits";
 import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { IconBriefcase, IconChat, IconMapPin, IconCheck } from "@/components/ui/icons";
+import { IconBriefcase, IconMapPin, IconCheck } from "@/components/ui/icons";
 import { areaLabel, naira } from "@/lib/format";
 import type { JobSummary } from "@/lib/types";
 
-/** Read engagement + job-post ids defensively — swagger left the shape opaque. */
+/** Read engagement ids defensively — swagger left the shape opaque. */
 function ids(item: JobSummary & Record<string, unknown>) {
   return {
     engagementId: (item.engagement_id as string) ?? (item.id as string),
-    jobPostId: (item.job_post_id as string) ?? (item.id as string),
     agreedPrice: (item.agreed_price as number) ?? null,
   };
 }
@@ -60,9 +58,8 @@ export default function ArtisanActive() {
 }
 
 function EngagementCard({ job, onChanged }: { job: JobSummary; onChanged: () => void }) {
-  const router = useRouter();
   const toast = useToast();
-  const { engagementId, jobPostId, agreedPrice } = ids(job as JobSummary & Record<string, unknown>);
+  const { engagementId, agreedPrice } = ids(job as JobSummary & Record<string, unknown>);
   const [busy, setBusy] = useState<string | null>(null);
   const [dialog, setDialog] = useState<null | "decline" | "complete">(null);
   const status = job.status;
@@ -78,15 +75,6 @@ function EngagementCard({ job, onChanged }: { job: JobSummary; onChanged: () => 
     } finally {
       setBusy(null);
       setDialog(null);
-    }
-  }
-
-  async function message() {
-    try {
-      const convo = await messagesApi.open({ jobPostId });
-      router.push(`/artisan/messages/${convo.id}`);
-    } catch (err) {
-      toast.error(messageFor(err));
     }
   }
 
@@ -106,10 +94,6 @@ function EngagementCard({ job, onChanged }: { job: JobSummary; onChanged: () => 
       <p className="mt-2 line-clamp-2 text-sm text-muted">{job.description}</p>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button variant="secondary" size="sm" onClick={message}>
-          <IconChat size={16} /> Message
-        </Button>
-
         {status === "ARTISAN_SELECTED" && (
           <>
             <Button variant="ghost" size="sm" className="text-muted" onClick={() => setDialog("decline")}>

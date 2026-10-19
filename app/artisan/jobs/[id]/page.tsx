@@ -1,11 +1,8 @@
 "use client";
 
 import { use, useState } from "react";
-import { useRouter } from "next/navigation";
-import { jobsApi, messagesApi } from "@/lib/api";
+import { jobsApi } from "@/lib/api";
 import { useAsync } from "@/lib/hooks";
-import { messageFor } from "@/lib/errors";
-import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/Button";
 import { Loading, ErrorState } from "@/components/ui/states";
 import { BackLink, UrgencyBadge } from "@/components/ui/bits";
@@ -13,12 +10,10 @@ import { RailLayout, SectionCard } from "@/components/ui/patterns";
 import { ApplyModal } from "@/components/artisan/ApplyModal";
 import { ReportModal } from "@/components/shared/ReportModal";
 import { areaLabel, budgetLabel, dateTime, humanize, timeAgo } from "@/lib/format";
-import { IconMapPin, IconClock, IconChat, IconFlag, IconCheck } from "@/components/ui/icons";
+import { IconMapPin, IconClock, IconFlag, IconCheck } from "@/components/ui/icons";
 
 export default function ArtisanJobDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
-  const toast = useToast();
   const { data: job, loading, error, reload } = useAsync(() => jobsApi.get(id), [id]);
   const [applyOpen, setApplyOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -40,15 +35,6 @@ export default function ArtisanJobDetail({ params }: { params: Promise<{ id: str
       (job as Record<string, unknown>).applied,
   );
   const isOpen = ["PUBLISHED", "RECEIVING_APPLICATIONS"].includes(job.status);
-
-  async function message() {
-    try {
-      const convo = await messagesApi.open({ jobPostId: job!.id });
-      router.push(`/artisan/messages/${convo.id}`);
-    } catch (err) {
-      toast.error(messageFor(err));
-    }
-  }
 
   return (
     <div>
@@ -95,9 +81,6 @@ export default function ArtisanJobDetail({ params }: { params: Promise<{ id: str
                     This job is {humanize(job.status).toLowerCase()} and not accepting applications.
                   </p>
                 )}
-                <Button variant="secondary" fullWidth onClick={message}>
-                  <IconChat size={18} /> Message customer
-                </Button>
               </div>
               <p className="mt-3 text-xs text-muted">
                 The exact street address is shared once the customer selects you.

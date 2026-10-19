@@ -54,8 +54,11 @@ export default function CustomerJobDetail({ params }: { params: Promise<{ id: st
   }
 
   async function messageArtisan() {
-    if (!engagement) return;
-    const artisanId = (engagement as Record<string, unknown>).artisan_id as string | undefined;
+    const artisanId = engagement?.artisan_id;
+    if (!engagement || !artisanId) {
+      toast.error("The artisan details are incomplete. Refresh the page and try again.");
+      return;
+    }
     try {
       const convo = await messagesApi.open({ jobPostId: job!.id, artisanId });
       router.push(`/messages/${convo.id}`);
