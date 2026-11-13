@@ -23,6 +23,21 @@ const GROUP_META: Record<CategoryGroup, { label: string; icon: React.ComponentTy
   GENERAL: { label: "More services", icon: IconGrid },
 };
 
+const SEARCH_SUGGESTIONS = [
+  "fix leaking pipe",
+  "AC gas refill",
+  "electrical wiring",
+  "solar inverter installation",
+  "plumbing repair",
+  "furniture assembly",
+  "generator service",
+  "painting",
+  "tiling",
+  "CCTV installation",
+  "door lock repair",
+  "ceiling fan repair",
+];
+
 export default function CustomerHome() {
   const { user } = useAuth();
   const router = useRouter();
@@ -39,12 +54,14 @@ export default function CustomerHome() {
   );
   const { data: recent } = useAsync(() => jobsApi.mine({ limit: 3 }), []);
 
-  console.log(tree, "tree")
-
   function goToJob(serviceId: string, serviceName: string) {
     const params = new URLSearchParams({ serviceId, serviceName });
     if (query.trim()) params.set("title", query.trim());
     router.push(`/jobs/new?${params.toString()}`);
+  }
+
+  function pickSuggestion(term: string) {
+    setQuery(term);
   }
 
   return (
@@ -67,7 +84,7 @@ export default function CustomerHome() {
             aria-label="Describe what you need"
           />
           {/* Search results dropdown */}
-          {debounced.trim().length >= 2 && (
+          {debounced.trim().length >= 2 ? (
             <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-line bg-surface shadow-lg">
               {searching ? (
                 <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted">
@@ -94,6 +111,33 @@ export default function CustomerHome() {
                   </Link>
                 </div>
               )}
+            </div>
+          ) : query.trim().length > 0 ? (
+            <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-line bg-surface shadow-lg">
+              <div className="px-4 py-3">
+                <p className="text-sm text-ink-soft">No exact match — you can still post it and describe it freely.</p>
+                <Link href="/jobs/new" className="mt-1 inline-block text-sm font-semibold text-brand-600">
+                  Post this job →
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-line bg-surface shadow-lg">
+              <div className="px-4 pb-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-3">Popular searches</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {SEARCH_SUGGESTIONS.map((term) => (
+                    <button
+                      key={term}
+                      onClick={() => pickSuggestion(term)}
+                      className="flex items-center justify-between gap-2 px-3 py-2 text-sm text-ink hover:bg-canvas transition"
+                    >
+                      <span>{term}</span>
+                      <IconChevronRight size={14} className="text-muted" />
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>

@@ -72,6 +72,22 @@ export function VerificationGate({
   }
 
   // PENDING / not yet submitted → onboarding.
+  const hasSubmitted = Boolean(application?.submitted_at);
+  if (hasSubmitted) {
+    return (
+      <Shell
+        icon={<IconClock size={28} />}
+        title="Awaiting verification"
+        badge={normalized}
+        body="You've submitted your profile for verification. Our team is reviewing your details and documents. You won't see jobs or be able to apply until you're approved. We'll notify you as soon as there's an update."
+      >
+        <LinkButton href="/artisan/profile" variant="secondary" size="sm">
+          Review my profile
+        </LinkButton>
+      </Shell>
+    );
+  }
+
   return (
     <Shell
       icon={<IconShield size={28} />}

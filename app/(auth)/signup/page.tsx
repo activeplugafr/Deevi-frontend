@@ -9,20 +9,67 @@ import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/primitives";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { cn } from "@/lib/cn";
-import { IconSearch, IconWrench } from "@/components/ui/icons";
-import { useToast } from "@/components/ui/Toast";
+import { IconSearch, IconWrench, IconEye, IconEyeOff } from "@/components/ui/icons";
 
 type SignupRole = "CUSTOMER" | "ARTISAN";
+
+function PasswordInput({
+  id,
+  label,
+  value,
+  onChange,
+  required,
+  hint,
+  autoComplete,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+  hint?: string;
+  autoComplete?: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <Field label={label} htmlFor={id} required={required} hint={hint}>
+      <div className="relative">
+        <input
+          id={id}
+          type={show ? "text" : "password"}
+          required={required}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete={autoComplete}
+          placeholder="••••••••"
+          className={cn(controlBase(), "h-11 pr-12")}
+        />
+        <button
+          type="button"
+          onClick={() => setShow((s) => !s)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
+          aria-label={show ? "Hide password" : "Show password"}
+        >
+          {show ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+        </button>
+      </div>
+    </Field>
+  );
+}
+
+function controlBase() {
+  return "w-full rounded-control border border-line bg-surface px-3.5 text-sm text-ink placeholder:text-muted outline-none transition focus:border-brand-600 focus:ring-[3px] focus:ring-brand-600/15 disabled:bg-canvas disabled:text-muted";
+}
 
 function SignupForm() {
   const { signup } = useAuth();
   const router = useRouter();
-  const toast = useToast();
   const params = useSearchParams();
   const initialRole = (params.get("role") === "ARTISAN" ? "ARTISAN" : "CUSTOMER") as SignupRole;
 
   const [role, setRole] = useState<SignupRole>(initialRole);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", password: "", confirmPassword: "" });
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -32,6 +79,14 @@ function SignupForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!termsAccepted) {
+      setError("You must agree to the Terms & Conditions to continue.");
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await signup({
@@ -45,8 +100,6 @@ function SignupForm() {
       if (res.session?.accessToken) {
         router.replace(homePathFor(role));
       } else {
-        // Email confirmation required — no session issued.
-        // toast.success("Account created. Please confirm your email, then log in.");
         router.replace("/login?registered=true");
       }
     } catch (err) {
@@ -104,9 +157,36 @@ function SignupForm() {
         <Field label="Phone" htmlFor="phone" hint="Optional — helps artisans reach you faster.">
           <Input id="phone" type="tel" value={form.phone} onChange={set("phone")} autoComplete="tel" placeholder="0803 000 0000" />
         </Field>
-        <Field label="Password" htmlFor="password" required hint="At least 8 characters, with a letter and a number.">
-          <Input id="password" type="password" required minLength={8} value={form.password} onChange={set("password")} autoComplete="new-password" placeholder="••••••••" />
-        </Field>
+        <PasswordInput
+          id="password"
+          label="Password"
+          value={form.password}
+          onChange={set("password")}
+          required
+          hint="At least 8 characters, with a letter and a number."
+          autoComplete="new-password"
+        />
+        <PasswordInput
+          id="confirmPassword"
+          label="Confirm password"
+          value={form.confirmPassword}
+          onChange={set("confirmPassword")}
+          required
+          hint="Type the same password again."
+          autoComplete="new-password"
+        />
+        <div className="flex items-start gap-2">
+          <input
+            id="terms"
+            type="checkbox"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            className="mt-0.5 rounded-control border border-line text-brand-600 focus:ring-brand-600"
+          />
+          <label htmlFor="terms" className="text-sm text-ink leading-snug">
+            I agree to the <Link href="/terms" className="font-semibold text-brand-600 hover:text-brand-700 underline">Terms &amp; Conditions</Link> and <Link href="/terms" className="font-semibold text-brand-600 hover:text-brand-700 underline">Privacy Policy</Link>.
+          </label>
+        </div>
         <Button type="submit" fullWidth size="lg" loading={loading}>
           Create account
         </Button>

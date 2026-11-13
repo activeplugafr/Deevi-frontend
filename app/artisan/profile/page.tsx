@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { artisansApi, catalogueApi } from "@/lib/api";
+import { artisansApi, catalogueApi, storageApi } from "@/lib/api";
 import { useAsync } from "@/lib/hooks";
 import { messageFor } from "@/lib/errors";
 import { useToast } from "@/components/ui/Toast";
@@ -14,7 +14,9 @@ import { PageHeader, Stars, VerificationBadge } from "@/components/ui/bits";
 import { cn } from "@/lib/cn";
 import { fullName, humanize, naira } from "@/lib/format";
 import { IconCheck, IconMapPin } from "@/components/ui/icons";
-import type { PublicArtisan, AvailabilityStatus } from "@/lib/types";
+import Image from "next/image";
+import { Spinner } from "@/components/ui/Spinner";
+import type { PublicArtisan, AvailabilityStatus, StorageBucket } from "@/lib/types";
 
 export default function ArtisanProfilePage() {
   const toast = useToast();
@@ -177,11 +179,51 @@ function EditInfoModal({ artisan, onClose, onSaved }: { artisan: PublicArtisan; 
     baseCity: artisan.base_city ?? "",
     baseState: artisan.base_state ?? "",
   });
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(artisan.avatar_url ?? null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  async function onAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file.");
+      return;
+    }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  }
+
+  async function uploadAvatar(): Promise<string | null> {
+    if (!avatarFile) return null;
+    setUploadingAvatar(true);
+    try {
+      const ticket = await storageApi.uploadTicket({
+        bucket: "avatars" as StorageBucket,
+        filename: avatarFile.name,
+        mimeType: avatarFile.type,
+        sizeBytes: avatarFile.size,
+      });
+      const res = await fetch(ticket.uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": avatarFile.type, ...(ticket.token ? { Authorization: `Bearer ${ticket.token}` } : {}) },
+        body: avatarFile,
+      });
+      if (!res.ok) throw new Error("Avatar upload failed.");
+      return ticket.publicUrl ?? ticket.path;
+    } catch (err) {
+      toast.error(messageFor(err));
+      return null;
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
 
   async function save() {
     setBusy(true);
     try {
+      const avatarUrl = await uploadAvatar();
       await artisansApi.update({
         headline: form.headline.trim(),
         businessName: form.businessName.trim() || undefined,
@@ -189,6 +231,7 @@ function EditInfoModal({ artisan, onClose, onSaved }: { artisan: PublicArtisan; 
         yearsOfExperience: form.yearsOfExperience ? Number(form.yearsOfExperience) : undefined,
         baseCity: form.baseCity.trim() || undefined,
         baseState: form.baseState.trim() || undefined,
+        avatarUrl: avatarUrl ?? undefined,
       });
       toast.success("Profile updated.");
       onSaved();
@@ -196,6 +239,7 @@ function EditInfoModal({ artisan, onClose, onSaved }: { artisan: PublicArtisan; 
       toast.error(messageFor(err));
     } finally {
       setBusy(false);
+      setUploadingAvatar(false);
     }
   }
 
@@ -203,9 +247,35 @@ function EditInfoModal({ artisan, onClose, onSaved }: { artisan: PublicArtisan; 
     <Modal open onClose={onClose} title="Edit profile" size="lg"
       footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button onClick={save} loading={busy}>Save</Button></>}>
       <div className="space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Image
+              src={avatarPreview ?? artisan.avatar_url ?? ""}
+              alt={artisan.business_name || fullName(artisan.first_name, artisan.last_name, "Profile")}
+              width={80}
+              height={80}
+              className="rounded-full object-cover bg-canvas border border-line"
+              style={{ width: 80, height: 80 }}
+            />
+            <label className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-white shadow-sm cursor-pointer hover:bg-brand-700 transition">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={onAvatarSelect}
+                className="sr-only"
+              />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6l6 6" /></svg>
+            </label>
+            {uploadingAvatar && <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-white text-[10px]"><Spinner size={14} className="text-brand-50" /></span>}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-muted">Profile picture</p>
+            <p className="text-xs text-muted">JPG or PNG, max 2MB.</p>
+          </div>
+        </div>
         <Field label="Headline"><Input value={form.headline} onChange={(e) => setForm({ ...form, headline: e.target.value })} /></Field>
         <Field label="Business name"><Input value={form.businessName} onChange={(e) => setForm({ ...form, businessName: e.target.value })} /></Field>
-        <Field label="About"><Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} /></Field>
+        <Field label="About"><Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} maxLength={1000} /><p className="mt-1 text-xs text-right text-muted">{form.bio.length} / 1000 characters</p></Field>
         <div className="grid grid-cols-3 gap-3">
           <Field label="Years exp."><Input type="number" min={0} value={form.yearsOfExperience} onChange={(e) => setForm({ ...form, yearsOfExperience: e.target.value })} /></Field>
           <Field label="Base city"><Input value={form.baseCity} onChange={(e) => setForm({ ...form, baseCity: e.target.value })} /></Field>

@@ -8,8 +8,11 @@ import { messageFor } from "@/lib/errors";
 import { useToast } from "@/components/ui/Toast";
 import { Card, Field, Input } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/Button";
+import { Toggle } from "@/components/ui/Toggle";
+import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { PageHeader } from "@/components/ui/bits";
+import { IconBell, IconClock } from "@/components/ui/icons";
 
 export function SettingsPanel() {
   const { logout } = useAuth();
@@ -19,6 +22,11 @@ export function SettingsPanel() {
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
   const [pwBusy, setPwBusy] = useState(false);
   const [deactivate, setDeactivate] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [jobAlerts, setJobAlerts] = useState(true);
+  const [messageAlerts, setMessageAlerts] = useState(true);
+  const [verificationAlerts, setVerificationAlerts] = useState(true);
+  const [marketingAlerts, setMarketingAlerts] = useState(false);
 
   async function changePassword() {
     if (pw.next.length < 8) {
@@ -66,6 +74,49 @@ export function SettingsPanel() {
             </Button>
           </div>
         </div>
+      </Card>
+
+      {/* Notification preferences */}
+      <Card className="mt-6 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-base font-semibold text-ink">Notifications</h2>
+            <p className="mt-1 text-sm text-muted">
+              Choose which updates you receive. Important alerts (verification decisions, job
+              selection, disputes) are always sent.
+            </p>
+          </div>
+          <Toggle
+            checked={notificationsEnabled}
+            onChange={(v) => {
+              setNotificationsEnabled(v);
+              toast.success(v ? "Notifications enabled." : "Notifications disabled.");
+            }}
+            label="Receive notifications"
+          />
+        </div>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between py-2 border-b border-line last:border-0">
+            <span className="text-sm text-ink">New job alerts</span>
+            <Toggle checked={jobAlerts} onChange={setJobAlerts} label="Job alerts" />
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-line last:border-0">
+            <span className="text-sm text-ink">Messages &amp; conversations</span>
+            <Toggle checked={messageAlerts} onChange={setMessageAlerts} label="Message alerts" />
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-line last:border-0">
+            <span className="text-sm text-ink">Verification &amp; account updates</span>
+            <Toggle checked={verificationAlerts} onChange={setVerificationAlerts} label="Verification alerts" />
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-line last:border-0">
+            <span className="text-sm text-ink">Promotions &amp; marketing</span>
+            <Toggle checked={marketingAlerts} onChange={setMarketingAlerts} label="Marketing" />
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-muted">
+          <IconBell size={14} className="mr-1" /> Notifications appear in your Notifications feed and as in-app alerts
+          for important events.
+        </p>
       </Card>
 
       {/* Danger zone */}

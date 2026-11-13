@@ -14,7 +14,7 @@ import { WorkspaceHeader, SectionCard, Stepper, RailLayout } from "@/components/
 import { ServicePicker, type PickedService } from "@/components/jobs/ServicePicker";
 import { LocationStep } from "@/components/jobs/LocationStep";
 import { cn } from "@/lib/cn";
-import { areaLabel, budgetLabel, humanize } from "@/lib/format";
+import { areaLabel, budgetLabel, humanize, naira } from "@/lib/format";
 import { IconShield, IconWrench, IconPlus, IconClock, IconCheck } from "@/components/ui/icons";
 import type { CreateJobInput, ServiceLocationInput, Urgency, BudgetType } from "@/lib/types";
 
@@ -66,9 +66,11 @@ function NewJobWizard() {
   const [budgetType, setBudgetType] = useState<BudgetType>("NEGOTIABLE");
   const [budgetMin, setBudgetMin] = useState("");
   const [budgetMax, setBudgetMax] = useState("");
+  const [transportFare, setTransportFare] = useState("");
   const [preferredStartAt, setPreferredStartAt] = useState("");
   const [preferredTimeNotes, setPreferredTimeNotes] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
+  const [shareWithSavedArtisans, setShareWithSavedArtisans] = useState(false);
   const [media, setMedia] = useState<UploadedMedia[]>([]);
   const [submitting, setSubmitting] = useState<false | "draft" | "publish">(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +98,8 @@ function NewJobWizard() {
       budgetType,
       budgetMin: budgetMin ? Number(budgetMin) : undefined,
       budgetMax: budgetMax ? Number(budgetMax) : undefined,
+      transportFare: transportFare ? Number(transportFare) : undefined,
+      shareWithSavedArtisans,
       preferredStartAt: preferredStartAt ? new Date(preferredStartAt).toISOString() : undefined,
       preferredTimeNotes: preferredTimeNotes.trim() || undefined,
       additionalNotes: additionalNotes.trim() || undefined,
@@ -187,7 +191,11 @@ function NewJobWizard() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="The pipe under my kitchen sink has been dripping for two days. There's a small puddle in the cabinet…"
                 className="min-h-[140px]"
+                maxLength={1000}
               />
+              <p className="mt-1 text-xs text-right text-muted">
+                {description.length} / 1000 characters
+              </p>
             </Field>
 
             <div>
@@ -243,9 +251,12 @@ function NewJobWizard() {
                 <Field label="To (₦)" htmlFor="bmax">
                   <Input id="bmax" type="number" inputMode="numeric" min={0} value={budgetMax} onChange={(e) => setBudgetMax(e.target.value)} placeholder="12000" />
                 </Field>
-              </div>
-            )}
-            <Field label="Preferred start" htmlFor="start">
+                </div>
+              )}
+              <Field label="Transport fare (₦)" htmlFor="tfare" hint="Optional amount to cover the artisan&apos;s travel to the job site.">
+                <Input id="tfare" type="number" inputMode="numeric" min={0} value={transportFare} onChange={(e) => setTransportFare(e.target.value)} placeholder="2000" />
+              </Field>
+              <Field label="Preferred start" htmlFor="start">
               <Input id="start" type="datetime-local" value={preferredStartAt} onChange={(e) => setPreferredStartAt(e.target.value)} />
             </Field>
             <Field label="Timing notes" htmlFor="tnotes">
@@ -266,11 +277,31 @@ function NewJobWizard() {
               <Row label="Urgency" value={humanize(urgency)} />
               <Row label="Location" value={areaLabel(location.neighbourhood, location.city, location.state)} />
               <Row label="Budget" value={budgetLabel(budgetMin ? Number(budgetMin) : null, budgetMax ? Number(budgetMax) : null, budgetType)} />
-              {preferredTimeNotes && <Row label="Timing" value={preferredTimeNotes} />}
+              {transportFare && <Row label="Transport fare" value={naira(Number(transportFare))} />}
+              {preferredStartAt && <Row label="Preferred start" value={readableDateTime(preferredStartAt)} />}
+              {preferredTimeNotes && <Row label="Timing notes" value={preferredTimeNotes} />}
               {media.length > 0 && <Row label="Photos" value={`${media.length} attached`} />}
             </div>
 
             <div className="rounded-control border border-line bg-brand-50/40 p-4">
+              <div className="mb-3 flex items-start gap-2">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={shareWithSavedArtisans}
+                    onChange={(e) => setShareWithSavedArtisans(e.target.checked)}
+                    className="rounded-control border border-line text-brand-600 focus:ring-brand-600"
+                  />
+                  <span className="text-sm font-medium text-ink">
+                    Share with my saved artisans first
+                  </span>
+                </label>
+                <p className="ml-auto text-xs text-muted">
+                  {shareWithSavedArtisans
+                    ? "Only your saved artisans can see and apply to this job at first."
+                    : "Publish publicly so all relevant artisans can apply."}
+                </p>
+              </div>
               <p className="text-sm font-semibold text-ink">What happens next</p>
               <ol className="mt-2 space-y-2">
                 {[
@@ -463,6 +494,20 @@ function Row({ label, value, multiline }: { label: string; value?: string | null
       </span>
     </div>
   );
+}
+
+function readableDateTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString("en-NG", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
 }
 
 export default function NewJobPage() {

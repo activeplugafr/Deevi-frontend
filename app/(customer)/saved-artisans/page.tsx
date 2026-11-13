@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useToast } from "@/components/ui/Toast";
+import { useRouter } from "next/navigation";
 import { Card, Avatar, Badge } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/Button";
 import { WorkspaceHeader } from "@/components/ui/patterns";
@@ -11,11 +11,12 @@ import { IconShield, IconMapPin, IconChat, IconPlus, IconClock, IconSearch, Icon
 import { savedArtisans, savedCategories, type SavedArtisan } from "@/lib/mocks/savedArtisans";
 
 export default function SavedArtisansPage() {
-  const toast = useToast();
+  const router = useRouter();
   const [cat, setCat] = useState<string>("All Saved");
   const [q, setQ] = useState("");
 
-  const preview = () => toast.show("Saved artisans is a preview in this build.", "info");
+  const requestQuote = (id: string) => router.push(`/artisans/${id}`);
+  const exploreArtisans = () => router.push("/artisans");
 
   const filtered = useMemo(
     () =>
@@ -66,7 +67,7 @@ export default function SavedArtisansPage() {
       {/* Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((a) => (
-          <ArtisanCard key={a.id} artisan={a} onAction={preview} />
+          <ArtisanCard key={a.id} artisan={a} onRequestQuote={() => requestQuote(a.id)} onMessage={() => requestQuote(a.id)} />
         ))}
 
         {/* Discover more CTA */}
@@ -90,7 +91,7 @@ export default function SavedArtisansPage() {
               </div>
             </div>
           </div>
-          <Button fullWidth onClick={preview}>Explore More Artisans</Button>
+          <Button fullWidth onClick={exploreArtisans}>Explore More Artisans</Button>
         </Card>
       </div>
 
@@ -112,7 +113,7 @@ export default function SavedArtisansPage() {
             </p>
           </div>
         </div>
-        <Button variant="secondary" onClick={preview} className="shrink-0">
+        <Button variant="secondary" onClick={() => router.push("/jobs/new")} className="shrink-0">
           <IconPlus size={16} /> Post new job
         </Button>
       </Card>
@@ -120,7 +121,7 @@ export default function SavedArtisansPage() {
   );
 }
 
-function ArtisanCard({ artisan: a, onAction }: { artisan: SavedArtisan; onAction: () => void }) {
+function ArtisanCard({ artisan: a, onRequestQuote, onMessage }: { artisan: SavedArtisan; onRequestQuote: () => void; onMessage: () => void }) {
   return (
     <Card className="flex flex-col p-4">
       <div className="flex items-start gap-3">
@@ -163,10 +164,10 @@ function ArtisanCard({ artisan: a, onAction }: { artisan: SavedArtisan; onAction
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <Button size="sm" onClick={onAction}>
+        <Button size="sm" onClick={onRequestQuote}>
           <IconPlus size={16} /> Request quote
         </Button>
-        <Button variant="secondary" size="sm" onClick={onAction}>
+        <Button variant="secondary" size="sm" onClick={onMessage}>
           <IconChat size={16} /> Message
         </Button>
       </div>

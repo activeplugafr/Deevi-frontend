@@ -316,6 +316,8 @@ export interface CreateJobInput {
   media?: { storagePath: string; mediaType?: "IMAGE" | "VIDEO"; mimeType?: string; sortOrder?: number }[];
   publish?: boolean;
   expiresInDays?: number;
+  transportFare?: number;
+  shareWithSavedArtisans?: boolean;
 }
 
 export interface JobHistoryEntry {
@@ -369,6 +371,7 @@ export interface FeedJob {
   distance_km: number | null;
   applications_count: number;
   media_count: number;
+  media?: JobMedia[];
   published_at: string | null;
   expires_at: string | null;
   relevance_score: number;
@@ -386,6 +389,9 @@ export interface CreateApplicationInput {
   availabilityNote?: string;
   canStartAt?: string;
   relevantExperience?: string;
+  transportFare?: number;
+  transportFarePaidBy?: "CUSTOMER" | "ARTISAN" | "INCLUDED";
+  relevantExperienceImages?: string[];
 }
 
 /** Application — opaque in swagger; fields confirmed against the live API. */

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/primitives";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { useToast } from "@/components/ui/Toast";
+import { IconEye, IconEyeOff } from "@/components/ui/icons";
 
 function LoginForm() {
   const { login } = useAuth();
@@ -18,6 +19,7 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
@@ -71,15 +73,26 @@ function LoginForm() {
           />
         </Field>
         <Field label="Password" htmlFor="password" required>
-          <Input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="pr-12"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+            </button>
+          </div>
         </Field>
         <div className="flex justify-end">
           <Link href="/forgot-password" className="text-sm font-medium text-brand-600 hover:text-brand-700">

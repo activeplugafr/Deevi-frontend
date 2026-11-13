@@ -129,6 +129,8 @@ export function LocationStep({
                       neighbourhood: loc.neighbourhood ?? undefined,
                       city: loc.city ?? undefined,
                       state: "Lagos",
+                      addressLine: loc.address_line ?? undefined,
+                      locationNotes: loc.notes ?? undefined,
                     })
                   }
                   className={cn(
