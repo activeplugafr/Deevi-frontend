@@ -1001,6 +1001,44 @@
                 ]
             }
         },
+        "/api/v1/catalogue/search-suggestions": {
+            "get": {
+                "description": "Returns predefined job search keywords. Optionally filters suggestions by a search query.",
+                "operationId": "Catalogue_getJobSearchSuggestions",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "required": true,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "suggestions": [
+                                            "Plumbing",
+                                            "Electrical repairs",
+                                            "House cleaning"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Get job search keyword suggestions",
+                "tags": [
+                    "Catalogue"
+                ]
+            }
+        },
         "/api/v1/catalogue/services": {
             "get": {
                 "operationId": "Catalogue_listServices",
@@ -1507,6 +1545,191 @@
                     }
                 ],
                 "summary": "Remove a saved location",
+                "tags": [
+                    "Customers"
+                ]
+            }
+        },
+        "/api/v1/customers/artisans": {
+            "get": {
+                "operationId": "Customers_listArtisans",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "Page number, 1-indexed",
+                        "schema": {
+                            "minimum": 1,
+                            "default": 1,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "description": "Items per page (max 100)",
+                        "schema": {
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 20,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "verificationStatus",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "PENDING",
+                                "UNDER_REVIEW",
+                                "APPROVED",
+                                "REJECTED",
+                                "SUSPENDED"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "city",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "serviceId",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List artisans",
+                "tags": [
+                    "Customers"
+                ]
+            }
+        },
+        "/api/v1/customers/saved/{artisanId}": {
+            "post": {
+                "operationId": "Customers_saveArtisan",
+                "parameters": [
+                    {
+                        "name": "artisanId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "tags": [
+                    "Customers"
+                ]
+            },
+            "delete": {
+                "operationId": "Customers_unsaveArtisan",
+                "parameters": [
+                    {
+                        "name": "artisanId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "tags": [
+                    "Customers"
+                ]
+            }
+        },
+        "/api/v1/customers/saved": {
+            "get": {
+                "operationId": "Customers_getSavedArtisans",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "tags": [
+                    "Customers"
+                ]
+            }
+        },
+        "/api/v1/customers/{artisanId}/saved-status": {
+            "get": {
+                "operationId": "Customers_isArtisanSaved",
+                "parameters": [
+                    {
+                        "name": "artisanId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
                 "tags": [
                     "Customers"
                 ]
@@ -4747,10 +4970,17 @@
                     },
                     {
                         "name": "status",
-                        "required": true,
+                        "required": false,
                         "in": "query",
+                        "description": "Filter applications by verification status",
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "PENDING",
+                                "UNDER_REVIEW",
+                                "APPROVED",
+                                "REJECTED"
+                            ]
                         }
                     }
                 ],
@@ -6303,7 +6533,7 @@
     ],
     "servers": [
         {
-            "url": "http://localhost:3001",
+            "url": "http://localhost:10000",
             "description": "Local development"
         }
     ],
@@ -7772,30 +8002,42 @@
                     }
                 }
             },
-            "JobMediaInputDto": {
+            "Buffer": {
+                "type": "object",
+                "properties": {}
+            },
+            "UploadedMediaFile": {
                 "type": "object",
                 "properties": {
-                    "storagePath": {
+                    "originalname": {
                         "type": "string",
-                        "description": "Storage path from POST /storage/upload-ticket (job-media bucket)"
+                        "description": "Original name of the uploaded file",
+                        "example": "kitchen-sink.jpg"
                     },
-                    "mediaType": {
+                    "mimetype": {
                         "type": "string",
-                        "enum": [
-                            "IMAGE",
-                            "VIDEO"
-                        ],
-                        "default": "IMAGE"
+                        "description": "MIME type of the uploaded file",
+                        "example": "image/jpeg"
                     },
-                    "mimeType": {
-                        "type": "string"
+                    "size": {
+                        "type": "number",
+                        "description": "File size in bytes",
+                        "example": 2048000
                     },
-                    "sortOrder": {
-                        "type": "number"
+                    "buffer": {
+                        "description": "Uploaded file contents as a Node.js Buffer",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Buffer"
+                            }
+                        ]
                     }
                 },
                 "required": [
-                    "storagePath"
+                    "originalname",
+                    "mimetype",
+                    "size",
+                    "buffer"
                 ]
             },
             "CreateJobPostDto": {
@@ -7857,6 +8099,11 @@
                         ],
                         "default": "NEGOTIABLE"
                     },
+                    "transport_fare": {
+                        "type": "number",
+                        "example": 15000,
+                        "description": "In NGN"
+                    },
                     "preferredStartAt": {
                         "type": "string",
                         "format": "date-time",
@@ -7881,7 +8128,7 @@
                         "description": "Photos or video of the problem",
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/JobMediaInputDto"
+                            "$ref": "#/components/schemas/UploadedMediaFile"
                         }
                     },
                     "publish": {
@@ -8011,6 +8258,9 @@
                         "type": "number"
                     },
                     "budgetMax": {
+                        "type": "number"
+                    },
+                    "transportFare": {
                         "type": "number"
                     },
                     "budgetType": {
