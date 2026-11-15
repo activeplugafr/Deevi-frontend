@@ -161,7 +161,7 @@ function SignupForm() {
           id="password"
           label="Password"
           value={form.password}
-          onChange={set("password")}
+          onChange={(v) => setForm((f) => ({ ...f, password: v }))}
           required
           hint="At least 8 characters, with a letter and a number."
           autoComplete="new-password"
@@ -170,7 +170,7 @@ function SignupForm() {
           id="confirmPassword"
           label="Confirm password"
           value={form.confirmPassword}
-          onChange={set("confirmPassword")}
+          onChange={(v) => setForm((f) => ({ ...f, confirmPassword: v }))}
           required
           hint="Type the same password again."
           autoComplete="new-password"

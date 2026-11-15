@@ -15,7 +15,9 @@ export default function SavedArtisansPage() {
   const [cat, setCat] = useState<string>("All Saved");
   const [q, setQ] = useState("");
 
-  const requestQuote = (id: string) => router.push(`/artisans/${id}`);
+  // const requestQuote = (id: string) => router.push(`/artisans/${id}`);
+  const requestQuote = (id: string) => router.push(`/messages/${id}`);
+
   const exploreArtisans = () => router.push("/artisans");
 
   const filtered = useMemo(
@@ -163,11 +165,11 @@ function ArtisanCard({ artisan: a, onRequestQuote, onMessage }: { artisan: Saved
         <span className="text-sm font-semibold text-ink tnum">From {naira(a.baseRate)} <span className="font-normal text-muted">/ visit</span></span>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <Button size="sm" onClick={onRequestQuote}>
+      <div className="mt-3  gap-2">
+        {/* <Button size="sm" onClick={onRequestQuote}>
           <IconPlus size={16} /> Request quote
-        </Button>
-        <Button variant="secondary" size="sm" onClick={onMessage}>
+        </Button> */}
+        <Button size="sm" onClick={onMessage}>
           <IconChat size={16} /> Message
         </Button>
       </div>

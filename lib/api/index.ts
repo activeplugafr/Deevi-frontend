@@ -93,6 +93,16 @@ export const usersApi = {
 
 // ---- Customers -------------------------------------------------------------
 
+type CustomerArtisanListParams = {
+  page?: number;
+  limit?: number;
+  verificationStatus?: JobStatus;
+  city?: string;
+  serviceId?: string;
+  q?: string;
+};
+
+
 export const customersApi = {
   me: () => http.get<CustomerProfile>("/customers/me"),
   update: (input: { defaultLocationId?: string; preferredContact?: "IN_APP" | "PHONE" | "EMAIL" }) =>
@@ -103,6 +113,14 @@ export const customersApi = {
   updateLocation: (id: string, input: Record<string, unknown>) =>
     http.patch<Location>(`/customers/me/locations/${id}`, input),
   removeLocation: (id: string) => http.del<void>(`/customers/me/locations/${id}`),
+  artisans: (params?: CustomerArtisanListParams) => http.get<Paginated<unknown>>("/customers/artisans", params),
+  savedArtisans: () => http.get<unknown>("/customers/saved"),
+  artisanSavedStatus: (artisanId: string) => http.get<unknown>(`/customers/${artisanId}/saved-status`),
+  saveArtisan: (artisanId: string) =>
+    http.post<unknown>(`/customers/saved/${artisanId}`, artisanId),
+  removeSavedArtisan: (artisanId: string) => http.del<void>(`/customers/saved/${artisanId}`),
+
+
 };
 
 // ---- Artisans --------------------------------------------------------------

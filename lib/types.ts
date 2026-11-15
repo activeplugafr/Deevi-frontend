@@ -316,7 +316,7 @@ export interface CreateJobInput {
   media?: { storagePath: string; mediaType?: "IMAGE" | "VIDEO"; mimeType?: string; sortOrder?: number }[];
   publish?: boolean;
   expiresInDays?: number;
-  transportFare?: number;
+  transport_fare?: number;
   shareWithSavedArtisans?: boolean;
 }
 

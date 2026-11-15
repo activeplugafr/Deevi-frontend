@@ -207,7 +207,7 @@ function AddLocationModal({ onClose, onSaved }: { onClose: () => void; onSaved: 
         neighbourhood: form.neighbourhood.trim() || undefined,
         city: form.city.trim(),
         state: form.state.trim() || undefined,
-        country: "Nigeria",
+        country: "Ng",
         source: "MANUAL",
       });
       onSaved();

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { catalogueApi, jobsApi } from "@/lib/api";
+import { catalogueApi, customersApi, jobsApi } from "@/lib/api";
 import { useAsync, useDebounced } from "@/lib/hooks";
 import { useAuth } from "@/lib/auth/context";
 import { Card } from "@/components/ui/primitives";
@@ -53,6 +53,14 @@ export default function CustomerHome() {
     [debounced],
   );
   const { data: recent } = useAsync(() => jobsApi.mine({ limit: 3 }), []);
+
+  const { data: artisans, loading: artisansLoading } = useAsync(() => customersApi.artisans(), []);
+  const { data: savedArtisans, loading: savedArtisansLoading } = useAsync(() => customersApi.savedArtisans(), []);
+  // const { data: tree, loading: treeLoading } = useAsync(() => catalogueApi.tree(), []);
+
+  console.log(artisans, "artts")
+
+
 
   function goToJob(serviceId: string, serviceName: string) {
     const params = new URLSearchParams({ serviceId, serviceName });
